@@ -1,34 +1,159 @@
-/* static/style.css */
-body {
-    background-color: #1e1e1e;
-    color: white;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+/* ==============================
+   SISTEMA ESCOLAR — ESTILO GERAL
+============================== */
+
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.container {
-    text-align: center;
-    background: #2c2c2c;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+body {
+    background: #1E293B;
+    color: #E2E8F0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-height: 100vh;
 }
 
-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    border: none;
-    background: #00bfff;
+/* TEXTOS */
+h1, h2, h3, h4, h5, h6 { color: #F1F5F9; }
+p { color: #94A3B8; }
+a { text-decoration: none; color: #60A5FA; transition: 0.3s; }
+a:hover { color: #93C5FD; }
+
+/* NAVBAR */
+.navbar {
+    background: #0F172A !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    border-bottom: 1px solid #334155;
+}
+.navbar-brand { color: #F8FAFC !important; font-size: 1.2rem; font-weight: 700; }
+.navbar .nav-link { color: #CBD5E1 !important; font-weight: 500; }
+.navbar .nav-link:hover { color: #FFFFFF !important; }
+.navbar .nav-link.active { color: #60A5FA !important; }
+.badge-admin {
+    background: #7C3AED;
     color: white;
-    font-size: 16px;
-    border-radius: 10px;
-    cursor: pointer;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+.badge-aluno {
+    background: #0369A1;
+    color: white;
+    font-size: 0.7rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 700;
 }
 
-button:hover {
-    background: #009acd;
+/* CARDS */
+.card {
+    background: #273449;
+    border-radius: 14px;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.card:hover { transform: translateY(-2px); }
+
+/* FORM CONTROLS */
+.form-label { color: #E2E8F0 !important; font-weight: 600; }
+.form-control, .form-select {
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border: 1px solid #475569 !important;
+    border-radius: 8px !important;
+}
+.form-control::placeholder { color: #64748B !important; }
+.form-control:focus, .form-select:focus {
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #60A5FA !important;
+    box-shadow: none !important;
+}
+
+/* TABELAS */
+.table { color: #E2E8F0 !important; }
+.table th {
+    background: #0F172A;
+    color: #94A3B8;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-color: #334155 !important;
+}
+.table td { border-color: #334155 !important; vertical-align: middle; }
+.table-hover tbody tr:hover { background: rgba(96,165,250,0.07) !important; }
+
+/* BADGES */
+.badge-disponivel { background: rgba(52,211,153,0.15); color: #34D399; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; }
+.badge-emprestado { background: rgba(248,113,113,0.15); color: #F87171; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; }
+
+/* FOOTER */
+footer {
+    background: #0F172A;
+    border-top: 1px solid #334155;
+    color: #64748B;
+    text-align: center;
+    padding: 16px;
+    margin-top: 60px;
+    font-size: 0.85rem;
+}
+
+/* STAT CARDS */
+.stat-number { font-size: 2.2rem; font-weight: 800; }
+
+/* =========================
+   MEU PERFIL
+========================= */
+
+.text-secondary{
+    color: #CBD5E1 !important;
+}
+
+.small{
+    color: #CBD5E1 !important;
+}
+
+
+.badge{
+    font-size: 0.9rem;
+}
+
+.card .text-secondary{
+    color: #CBD5E1 !important;
+}
+
+
+
+.card .fw-semibold{
+    color: #FFFFFF !important;
+}
+
+.card .fw-bold{
+    color: #FFFFFF !important;
+}
+
+.card .fs-5{
+    color: #FFFFFF !important;
+}
+
+.table td,
+.table tbody tr,
+.table tbody {
+    color: #F8FAFC !important;
+}
+
+.table tbody tr {
+    background-color: #273449 !important;
+}
+
+.table td {
+    color: #000 !important;
+}
+
+.table .fw-semibold {
+    color: #000 !important;
 }

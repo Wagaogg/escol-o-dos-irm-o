@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}{{ aluno.nome }} - Sistema Escolar{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">👨‍🎓 {{ aluno.nome }}</h1>
+            <p class="text-secondary">Perfil do aluno</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if pode_editar %}
+            <a href="{{ url_for('editar_aluno', aluno_id=aluno.id) }}" class="btn btn-warning">✏️ Editar</a>
+            {% endif %}
+            <a href="{{ url_for('alunos_lista') }}" class="btn btn-secondary">← Voltar</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-8">
+            <div class="card border-0 shadow p-4" style="background: #1e293b; color: #f1f5f9;">
+                <h4 class="fw-bold mb-4" style="color: #f1f5f9;">Informações do Aluno</h4>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Matrícula</div>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.matricula or '-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Turma</div>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.turma or '-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Série</div>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.serie or '-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Data de Nascimento</div>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.data_nascimento or '-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Email</div>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.email or '-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-secondary small">Telefone</div>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.telefone or '-' }}</div>
+                    </div>
+                </div>
+
+                <!-- Responsáveis -->
+                <div class="mt-4">
+                    <h5 class="fw-bold" style="color: #f1f5f9;">👨‍👩‍👦 Responsáveis</h5>
+                    {% if aluno.responsaveis %}
+                        <ul class="list-unstyled mt-2">
+                            {% for r in aluno.responsaveis %}
+                            <li style="color: #f1f5f9; padding: 4px 0;">
+                                <strong>{{ r.nome }}</strong>
+                                <span class="text-secondary">({{ r.parentesco }})</span>
+                                {% if r.telefone %}
+                                    <span class="text-secondary"> - {{ r.telefone }}</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="color: #94a3b8;">Nenhum responsável cadastrado.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Boletim -->
+                <div class="mt-4">
+                    <a href="{{ url_for('boletim', aluno_id=aluno.id) }}" class="btn btn-info">📊 Ver Boletim</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow p-4 text-center" style="background: #1e293b; color: #f1f5f9;">
+                <span style="font-size: 5rem;">👨‍🎓</span>
+                <h4 class="fw-bold mt-3" style="color: #f1f5f9;">{{ aluno.nome }}</h4>
+                <span class="badge bg-primary mt-1">{{ aluno.turma or 'Sem turma' }}</span>
+                <div class="mt-4 d-grid gap-2">
+                    {% if pode_editar %}
+                    <a href="{{ url_for('editar_aluno', aluno_id=aluno.id) }}" class="btn btn-warning">✏️ Editar dados</a>
+                    <form action="{{ url_for('excluir_aluno', aluno_id=aluno.id) }}" method="POST"
+                          onsubmit="return confirm('Tem certeza que deseja excluir este aluno?')">
+                        <button type="submit" class="btn btn-outline-danger w-100">🗑 Excluir aluno</button>
+                    </form>
+                    {% endif %}
+                    <a href="{{ url_for('boletim', aluno_id=aluno.id) }}" class="btn btn-info">📊 Ver Boletim</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

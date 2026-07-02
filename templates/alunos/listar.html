@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Lista de Alunos</h1>
+        {% if pode_editar %}
+        <a href="{{ url_for('cadastrar_aluno') }}" class="btn btn-primary">Novo Aluno</a>
+        {% endif %}
+    </div>
+
+    <!-- BUSCA -->
+    <div class="card border-0 shadow mb-4 p-3">
+        <form method="GET" action="{{ url_for('alunos_lista') }}" class="d-flex gap-2">
+            <input type="text" name="busca" class="form-control" placeholder="Buscar aluno..." value="{{ busca }}">
+            <button type="submit" class="btn btn-primary px-4">Buscar</button>
+            {% if busca %}
+            <a href="{{ url_for('alunos_lista') }}" class="btn btn-outline-secondary">Limpar</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body">
+            {% if alunos %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Nome</th>
+                        <th>Matrícula</th>
+                        <th>Turma</th>
+                        <th>Responsáveis</th>
+                        {% if pode_editar %}<th>Ações</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aluno in alunos %}
+                    <tr>
+                        <td>
+                            {% if aluno.foto %}
+                                <img src="{{ url_for('static', filename=aluno.foto) }}" alt="Foto" style="width:40px;height:40px;object-fit:cover;border-radius:50%;">
+                            {% else %}
+                                <span style="font-size:1.5rem;">👤</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ aluno.nome }}</td>
+                        <td>{{ aluno.matricula }}</td>
+                        <td>{{ aluno.turma or '-' }}</td>
+                        <td>
+                            {% if aluno.responsaveis %}
+                                {% for r in aluno.responsaveis %}
+                                    {{ r.nome }} ({{ r.parentesco }}){% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        {% if pode_editar %}
+                        <td>
+                            <a href="{{ url_for('perfil_aluno', aluno_id=aluno.id) }}" class="btn btn-sm btn-info">Ver</a>
+                            <a href="{{ url_for('editar_aluno', aluno_id=aluno.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                            <form action="{{ url_for('excluir_aluno', aluno_id=aluno.id) }}" method="POST" class="d-inline"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este aluno?')">
+                                <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-center p-5">
+                <h4>Nenhum aluno encontrado</h4>
+                <p>{% if busca %}Tente outra busca.{% else %}Clique em "Novo Aluno" para cadastrar.{% endif %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

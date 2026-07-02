@@ -1,0 +1,202 @@
+/* =========================
+   CORES GERAIS
+========================= */
+
+body{
+    background: #2B313A;
+    color: #F8FAFC;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar{
+    background: #34495E !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+.navbar-brand,
+.navbar-brand:visited{
+    color: #FFFFFF !important;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.navbar-brand:hover{
+    color: #F8FAFC !important;
+}
+
+.navbar .nav-link,
+.navbar .nav-link:visited{
+    color: #F1F5F9 !important;
+    font-weight: 600;
+}
+
+.navbar .nav-link:hover{
+    color: #FFFFFF !important;
+}
+
+.navbar .text-secondary{
+    color: #CBD5E1 !important;
+}
+
+.logout-btn,
+.logout-btn:visited{
+    color: #FF4D4D !important;
+    font-weight: 700;
+}
+
+.logout-btn:hover{
+    color: #FF0000 !important;
+}
+
+
+/* =========================
+   CONTEÚDO
+========================= */
+
+.container{
+    margin-top: 30px;
+}
+
+/* =========================
+   TÍTULOS
+========================= */
+
+h1,h2,h3,h4,h5{
+    color: #FFFFFF;
+}
+
+p{
+    color: #D1D5DB;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.card{
+    background: #3A4452;
+    border: none;
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    transition: 0.3s;
+}
+
+.card:hover{
+    transform: translateY(-4px);
+}
+
+.card-header{
+    background: #4A5568;
+    color: white;
+    border: none;
+}
+
+/* =========================
+   BOTÕES
+========================= */
+
+.btn-primary{
+    background: #4A6FA5;
+    border: none;
+}
+
+.btn-primary:hover{
+    background: #5A80B8;
+}
+
+.btn-success{
+    background: #43A047;
+    border: none;
+}
+
+.btn-success:hover{
+    background: #4CAF50;
+}
+
+.btn-danger{
+    background: #E53935;
+    border: none;
+}
+
+.btn-danger:hover{
+    background: #FF5252;
+}
+
+/* =========================
+   TABELAS
+========================= */
+
+.table{
+    background: #3A4452;
+    color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead{
+    background: #4A5568;
+}
+
+.table th{
+    color: white;
+}
+
+.table td{
+    color: #E2E8F0;
+}
+
+/* =========================
+   ALERTAS
+========================= */
+
+.alert{
+    border-radius: 12px;
+}
+
+/* =========================
+   FORMULÁRIOS
+========================= */
+
+.form-control{
+    background: #4A5568;
+    border: 1px solid #5A6575;
+    color: white;
+}
+
+.form-control:focus{
+    background: #4A5568;
+    color: white;
+    border-color: #6C8EBF;
+    box-shadow: none;
+}
+
+.form-control::placeholder{
+    color: #BFC7D5;
+}
+
+.usuario-logado{
+    color: #CBD5E1 !important;
+    font-size: 0.95rem;
+}
+
+/* MEU PERFIL */
+
+.text-secondary{
+    color: #CBD5E1 !important;
+}
+
+.small{
+    color: #CBD5E1 !important;
+}
+
+.fw-semibold{
+    color: #F8FAFC !important;
+}

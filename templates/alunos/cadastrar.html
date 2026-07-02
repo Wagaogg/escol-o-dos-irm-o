@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% block title %}Cadastrar Aluno - Sistema Escolar{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Cadastrar Aluno</h1>
+            <p class="text-secondary">Adicione um novo aluno ao sistema.</p>
+        </div>
+        <a href="{{ url_for('alunos_lista') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body p-4">
+
+            <form action="{{ url_for('salvar_aluno') }}" method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Nome Completo *</label>
+                        <input type="text" name="nome" class="form-control" placeholder="Nome do aluno" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Matrícula *</label>
+                        <input type="text" name="matricula" class="form-control" placeholder="Ex: 2026001" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Data de Nascimento</label>
+                        <input type="date" name="data_nascimento" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Série</label>
+                        <select name="serie" class="form-control">
+                            <option value="">Selecione...</option>
+                            <option value="1º Ano">1º Ano</option>
+                            <option value="2º Ano">2º Ano</option>
+                            <option value="3º Ano">3º Ano</option>
+                            <option value="4º Ano">4º Ano</option>
+                            <option value="5º Ano">5º Ano</option>
+                            <option value="6º Ano">6º Ano</option>
+                            <option value="7º Ano">7º Ano</option>
+                            <option value="8º Ano">8º Ano</option>
+                            <option value="9º Ano">9º Ano</option>
+                            <option value="1º EM">1º EM</option>
+                            <option value="2º EM">2º EM</option>
+                            <option value="3º EM">3º EM</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Turma</label>
+                        <input type="text" name="turma" class="form-control" placeholder="Ex: 2ºA / 2º Info">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="email@aluno.com">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Telefone</label>
+                        <input type="text" name="telefone" class="form-control" placeholder="(11) 99999-9999">
+                    </div>
+
+                </div>
+
+                <!-- Responsáveis -->
+                <div class="mt-4">
+                    <h5 class="fw-bold">👨‍👩‍👦 Responsáveis</h5>
+                    <div id="responsaveis-container">
+                        <div class="row g-2 mb-2 responsavel-item">
+                            <div class="col-md-4">
+                                <input type="text" name="resp_nome[]" class="form-control" placeholder="Nome do responsável">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="resp_telefone[]" class="form-control" placeholder="Telefone">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="resp_parentesco[]" class="form-control" placeholder="Parentesco (ex: Pai)">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger btn-sm remover-responsavel">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-responsavel">+ Adicionar Responsável</button>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">✅ Cadastrar Aluno</button>
+                    <a href="{{ url_for('alunos_lista') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.getElementById('add-responsavel').addEventListener('click', function() {
+    const container = document.getElementById('responsaveis-container');
+    const clone = container.querySelector('.responsavel-item').cloneNode(true);
+    clone.querySelectorAll('input').forEach(inp => inp.value = '');
+    container.appendChild(clone);
+});
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remover-responsavel')) {
+        const item = e.target.closest('.responsavel-item');
+        if (document.querySelectorAll('.responsavel-item').length > 1) {
+            item.remove();
+        } else {
+            alert('Deve haver pelo menos um responsável.');
+        }
+    }
+});
+</script>
+
+{% endblock %}

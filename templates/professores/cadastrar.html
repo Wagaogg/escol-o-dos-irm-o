@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Cadastrar Professor - Sistema Escolar{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Cadastrar Professor</h1>
+            <p class="text-secondary">Adicione um novo professor ao sistema. Disciplinas e turmas serão definidas depois.</p>
+        </div>
+        <a href="{{ url_for('professores') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body p-4">
+
+            <form action="{{ url_for('salvar_professor') }}" method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Nome *</label>
+                        <input type="text" name="nome" class="form-control" placeholder="Nome completo" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="email@professor.com">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Telefone</label>
+                        <input type="text" name="telefone" class="form-control" placeholder="(11) 99999-9999">
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">✅ Cadastrar Professor</button>
+                    <a href="{{ url_for('professores') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block title %}Editar Aluno - Sistema Escolar{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">✏️ Editar Aluno</h1>
+            <p class="text-secondary">Editando: {{ aluno.nome }}</p>
+        </div>
+        <a href="{{ url_for('perfil_aluno', aluno_id=aluno.id) }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body p-4">
+
+            <form action="{{ url_for('atualizar_aluno', aluno_id=aluno.id) }}" method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Nome Completo *</label>
+                        <input type="text" name="nome" class="form-control" value="{{ aluno.nome }}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Matrícula *</label>
+                        <input type="text" name="matricula" class="form-control" value="{{ aluno.matricula }}" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Data de Nascimento</label>
+                        <input type="date" name="data_nascimento" class="form-control" value="{{ aluno.data_nascimento or '' }}">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Série</label>
+                        <select name="serie" class="form-control">
+                            <option value="">Selecione...</option>
+                            {% for s in ['1º Ano','2º Ano','3º Ano','4º Ano','5º Ano','6º Ano','7º Ano','8º Ano','9º Ano','1º EM','2º EM','3º EM'] %}
+                            <option value="{{ s }}" {% if aluno.serie == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Turma</label>
+                        <input type="text" name="turma" class="form-control" value="{{ aluno.turma or '' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ aluno.email or '' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Telefone</label>
+                        <input type="text" name="telefone" class="form-control" value="{{ aluno.telefone or '' }}">
+                    </div>
+
+                </div>
+
+                <!-- Responsáveis -->
+                <div class="mt-4">
+                    <h5 class="fw-bold">👨‍👩‍👦 Responsáveis</h5>
+                    <div id="responsaveis-container">
+                        {% if aluno.responsaveis %}
+                            {% for r in aluno.responsaveis %}
+                            <div class="row g-2 mb-2 responsavel-item">
+                                <div class="col-md-4">
+                                    <input type="text" name="resp_nome[]" class="form-control" value="{{ r.nome }}" placeholder="Nome do responsável">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="resp_telefone[]" class="form-control" value="{{ r.telefone }}" placeholder="Telefone">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="resp_parentesco[]" class="form-control" value="{{ r.parentesco }}" placeholder="Parentesco">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger btn-sm remover-responsavel">✕</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="row g-2 mb-2 responsavel-item">
+                                <div class="col-md-4">
+                                    <input type="text" name="resp_nome[]" class="form-control" placeholder="Nome do responsável">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="resp_telefone[]" class="form-control" placeholder="Telefone">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="resp_parentesco[]" class="form-control" placeholder="Parentesco">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger btn-sm remover-responsavel">✕</button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-responsavel">+ Adicionar Responsável</button>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-warning">💾 Salvar Alterações</button>
+                    <a href="{{ url_for('perfil_aluno', aluno_id=aluno.id) }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.getElementById('add-responsavel').addEventListener('click', function() {
+    const container = document.getElementById('responsaveis-container');
+    const clone = container.querySelector('.responsavel-item').cloneNode(true);
+    clone.querySelectorAll('input').forEach(inp => inp.value = '');
+    container.appendChild(clone);
+});
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remover-responsavel')) {
+        const item = e.target.closest('.responsavel-item');
+        if (document.querySelectorAll('.responsavel-item').length > 1) {
+            item.remove();
+        } else {
+            alert('Deve haver pelo menos um responsável.');
+        }
+    }
+});
+</script>
+
+{% endblock %}
