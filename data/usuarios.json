@@ -1,0 +1,68 @@
+[
+    {
+        "nome": "Administrador",
+        "email": "admin@escola.com",
+        "senha": "admin123",
+        "tipo": "admin"
+    },
+    {
+        "nome": "maria jose",
+        "email": "maria@aluno.com",
+        "senha": "1234",
+        "tipo": "aluno"
+    },
+    {
+        "nome": "julio",
+        "email": "julio@gmail.com",
+        "senha": "1234567890",
+        "tipo": "aluno"
+    },
+    {
+        "nome": "paulo",
+        "email": "paulinho@gmail.com",
+        "senha": "1234567890",
+        "tipo": "admin"
+    },
+    {
+        "nome": "mz",
+        "email": "mz@mz",
+        "senha": "mz",
+        "tipo": "aluno"
+    },
+    {
+        "nome": "H-Eder do Novo Testamento de Jesus",
+        "email": "H@gmail.com",
+        "senha": "eder",
+        "tipo": "diretor"
+    },
+    {
+        "nome": "Cisco Packet Tracer da Silva",
+        "email": "cisco@gmail.com",
+        "senha": "123",
+        "tipo": "professor"
+    },
+    {
+        "nome": "juca",
+        "email": "juca@gmail.com",
+        "senha": "123",
+        "tipo": "aluno"
+    },
+    {
+        "nome": "hito",
+        "email": "alface@byron",
+        "senha": "123456",
+        "tipo": "aluno"
+    },
+    {
+        "nome": "davy jones do mal",
+        "email": "davyjonesdomal@gmail.com",
+        "senha": "1234567890",
+        "tipo": "aluno"
+    },
+    {
+        "nome": "meta ai",
+        "email": "claude@gemini.chatgpt.ia",
+        "senha": "1234567890",
+        "tipo": "aluno"
+    }
+]

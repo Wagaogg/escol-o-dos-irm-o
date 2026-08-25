@@ -1,0 +1,36 @@
+body{
+    background: linear-gradient(
+        135deg,
+        #17202E,
+        #1E293B
+    ) !important;
+
+    min-height: 100vh;
+}
+
+.card{
+    background: #273449 !important;
+    color: #F8FAFC !important;
+    border: 1px solid #334155 !important;
+}
+
+.card h1{
+    color: #F8FAFC !important;
+}
+
+.form-control{
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border: 1px solid #334155 !important;
+}
+
+.form-control:focus{
+    background: #1E293B !important;
+    color: #F8FAFC !important;
+    border-color: #3B82F6 !important;
+    box-shadow: none !important;
+}
+
+.form-label{
+    color: #CBD5E1 !important;
+}

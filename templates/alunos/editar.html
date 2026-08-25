@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Editar Aluno - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">✏️ Editar Aluno</h1>
+            <p style="color: #94a3b8;">Editando: {{ aluno.nome }}</p>
+        </div>
+        <!-- CORRIGIDO: perfil_aluno → alunos.perfil -->
+        <a href="{{ url_for('alunos.perfil', aluno_id=aluno.id) }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card shadow border-0" style="background: #1e293b;">
+        <div class="card-body p-4">
+
+            <!-- CORRIGIDO: atualizar_aluno → alunos.atualizar -->
+            <form action="{{ url_for('alunos.atualizar', aluno_id=aluno.id) }}" method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Nome Completo *</label>
+                        <input type="text" name="nome" class="form-control" value="{{ aluno.nome }}" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Matrícula *</label>
+                        <input type="text" name="matricula" class="form-control" value="{{ aluno.matricula }}" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" style="color: #f1f5f9;">Data de Nascimento</label>
+                        <input type="text" name="data_nascimento" class="form-control" 
+                               value="{% if aluno.data_nascimento %}{{ aluno.data_nascimento }}{% endif %}" 
+                               placeholder="dd/mm/aaaa" maxlength="10"
+                               oninput="mascaraData(this)"
+                               style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                        <small class="text-secondary">Formato: dd/mm/aaaa (ex: 15/03/2010)</small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" style="color: #f1f5f9;">Série</label>
+                        <select name="serie" class="form-control" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                            <option value="">Selecione...</option>
+                            {% for s in ['1º Ano','2º Ano','3º Ano','4º Ano','5º Ano','6º Ano','7º Ano','8º Ano','9º Ano','1º EM','2º EM','3º EM'] %}
+                            <option value="{{ s }}" {% if aluno.serie == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" style="color: #f1f5f9;">Turma</label>
+                        <input type="text" name="turma" class="form-control" value="{{ aluno.turma or '' }}" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ aluno.email or '' }}" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Telefone</label>
+                        <input type="text" name="telefone" class="form-control" value="{{ aluno.telefone or '' }}" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                </div>
+
+                <!-- Responsáveis -->
+                <div class="mt-4">
+                    <h5 class="fw-bold" style="color: #f1f5f9;">👨‍👩‍👦 Responsáveis</h5>
+                    <div id="responsaveis-container">
+                        {% if aluno.responsaveis %}
+                            {% for r in aluno.responsaveis %}
+                            <div class="row g-2 mb-2 responsavel-item">
+                                <div class="col-md-4">
+                                    <input type="text" name="resp_nome[]" class="form-control" value="{{ r.nome }}" placeholder="Nome do responsável" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="resp_telefone[]" class="form-control" value="{{ r.telefone }}" placeholder="Telefone" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="resp_parentesco[]" class="form-control" value="{{ r.parentesco }}" placeholder="Parentesco" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger btn-sm remover-responsavel">✕</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="row g-2 mb-2 responsavel-item">
+                                <div class="col-md-4">
+                                    <input type="text" name="resp_nome[]" class="form-control" placeholder="Nome do responsável" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="resp_telefone[]" class="form-control" placeholder="Telefone" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="resp_parentesco[]" class="form-control" placeholder="Parentesco" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger btn-sm remover-responsavel">✕</button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-responsavel" style="color: #60A5FA; border-color: #60A5FA;">+ Adicionar Responsável</button>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-warning">💾 Salvar Alterações</button>
+                    <!-- CORRIGIDO: perfil_aluno → alunos.perfil -->
+                    <a href="{{ url_for('alunos.perfil', aluno_id=aluno.id) }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/mascara.js') }}"></script>
+<script>
+document.getElementById('add-responsavel').addEventListener('click', function() {
+    const container = document.getElementById('responsaveis-container');
+    const clone = container.querySelector('.responsavel-item').cloneNode(true);
+    clone.querySelectorAll('input').forEach(inp => inp.value = '');
+    container.appendChild(clone);
+});
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remover-responsavel')) {
+        const item = e.target.closest('.responsavel-item');
+        if (document.querySelectorAll('.responsavel-item').length > 1) {
+            item.remove();
+        } else {
+            alert('Deve haver pelo menos um responsável.');
+        }
+    }
+});
+
+document.querySelector('form').addEventListener('submit', function(e) {
+    const dataInput = document.querySelector('input[name="data_nascimento"]');
+    const data = dataInput.value.trim();
+
+    if (data && !validarDataBR(data)) {
+        alert('Data de nascimento inválida. Use o formato dd/mm/aaaa (ex: 15/03/2010)');
+        e.preventDefault();
+        dataInput.focus();
+        return;
+    }
+});
+</script>
+
+{% endblock %}

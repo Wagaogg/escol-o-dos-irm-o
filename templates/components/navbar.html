@@ -1,0 +1,61 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" href="{{ url_for('dashboard.index') }}">
+            🏫 SEApp
+        </a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navMenu"
+                style="border-color:#475569;">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav ms-auto align-items-center gap-1">
+
+                {% if session.get("usuario") %}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('dashboard.index') }}">🏠 Início</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('biblioteca.listar') }}">📚 Biblioteca</a>
+                </li>
+
+                {% if session.get('tipo') in ['aluno', 'professor'] %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('meu_perfil.meu_perfil') }}">👤 Meu Perfil</a>
+                </li>
+                {% endif %}
+
+                {% if session.get('tipo') in ['admin', 'diretor'] %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.cadastro') }}">➕ Criar Conta</a>
+                </li>
+                {% endif %}
+
+                <li class="nav-item ms-2">
+                    <span class="badge {% if session.get('tipo') in ['admin','diretor'] %}badge-admin{% else %}badge-aluno{% endif %}">
+                        {{ session.get("tipo", "").upper() }}
+                    </span>
+                </li>
+
+                <li class="nav-item ms-1">
+                    <span class="nav-link" style="color:#CBD5E1;">
+                        {{ session["usuario"] }}
+                    </span>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link fw-bold"
+                       href="{{ url_for('auth.logout') }}"
+                       style="color:#F87171 !important;">
+                        Sair
+                    </a>
+                </li>
+
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+</nav>

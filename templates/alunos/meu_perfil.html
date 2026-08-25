@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Meu Perfil - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="mb-4">
+        <h1 class="fw-bold" style="color: #f1f5f9;">👤 Meu Perfil</h1>
+        <p style="color: #94a3b8;">Suas informações no sistema.</p>
+    </div>
+
+    {% if aluno %}
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow p-4 text-center" style="background: #1e293b; color: #f1f5f9;">
+                {% if foto %}
+                    <img src="{{ url_for('static', filename=foto) }}" alt="Foto" class="rounded-circle mx-auto d-block" style="width:120px;height:120px;object-fit:cover;border:3px solid #60A5FA;">
+                {% else %}
+                    <span style="font-size:5rem;">👨‍🎓</span>
+                {% endif %}
+                <h4 class="fw-bold mt-3" style="color: #f1f5f9;">{{ aluno.nome }}</h4>
+                <span class="badge bg-primary mt-1">{{ aluno.serie or 'Sem série' }}</span>
+                <span class="badge bg-secondary">Turma {{ aluno.turma or '-' }}</span>
+                <hr style="border-color:#334155;">
+                <div class="text-secondary small">Matrícula</div>
+                <div class="fw-bold fs-5" style="color: #f1f5f9;">{{ aluno.matricula or '-' }}</div>
+                <!-- CORRIGIDO: upload_foto → meu_perfil.upload_foto -->
+                <form action="{{ url_for('meu_perfil.upload_foto') }}" method="POST" enctype="multipart/form-data" class="mt-2">
+                    <input type="file" name="foto" class="form-control form-control-sm" accept=".jpg,.jpeg,.pdf" required>
+                    <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">📤 Enviar Foto</button>
+                    <small class="text-secondary">Apenas JPG e PDF</small>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-8 d-flex flex-column gap-4">
+
+            <div class="card border-0 shadow p-4" style="background: #1e293b; color: #f1f5f9;">
+                <h5 class="fw-bold mb-4" style="color: #f1f5f9;">📋 Informações Pessoais</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <span class="text-secondary">Nome</span>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.nome }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-secondary">Data Nasc.</span>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.data_nascimento or '-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-secondary">Email</span>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.email or '-' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <span class="text-secondary">Telefone</span>
+                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.telefone or '-' }}</div>
+                    </div>
+                </div>
+
+                <!-- Responsáveis -->
+                {% if aluno.responsaveis %}
+                <h5 class="fw-bold mt-4" style="color: #f1f5f9;">👨‍👩‍👦 Responsáveis</h5>
+                <ul class="list-unstyled">
+                    {% for r in aluno.responsaveis %}
+                    <li style="color: #cbd5e1; background: #334155; padding: 8px 12px; border-radius: 8px; margin-bottom: 5px;">
+                        <strong style="color: #facc15;">{{ r.nome }}</strong> 
+                        <span style="color: #94a3b8;">({{ r.parentesco }})</span> 
+                        <span style="color: #60a5fa;">{{ r.telefone }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p style="color: #94a3b8;">Nenhum responsável cadastrado.</p>
+                {% endif %}
+
+                <!-- CORRIGIDO: boletim → notas.boletim -->
+                <div class="mt-3">
+                    <a href="{{ url_for('notas.boletim', aluno_id=aluno.id) }}" class="btn btn-info">📊 Ver Boletim</a>
+                </div>
+            </div>
+
+            {% if livros_emprestados %}
+            <div class="card border-0 shadow p-4" style="background: #1e293b; color: #f1f5f9;">
+                <h5 class="fw-bold mb-4" style="color: #f1f5f9;">📚 Livros Emprestados</h5>
+                <table class="table" style="background: #1e293b; color: #f1f5f9;">
+                    <thead>
+                        <tr>
+                            <th style="color: #f1f5f9;">Título</th>
+                            <th style="color: #f1f5f9;">Data Empréstimo</th>
+                            <th style="color: #f1f5f9;">Data Devolução (limite)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for livro in livros_emprestados %}
+                        <tr>
+                            <td style="color: #f1f5f9;">{{ livro.titulo }}</td>
+                            <td style="color: #f1f5f9;">{{ livro.data_emprestimo or '-' }}</td>
+                            <td style="color: #f1f5f9;">{{ livro.data_devolucao or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card border-0 shadow p-4" style="background: #1e293b; color: #f1f5f9;">
+                <h5 class="fw-bold" style="color: #f1f5f9;">📚 Livros Emprestados</h5>
+                <p style="color: #94a3b8;">Nenhum livro emprestado no momento.</p>
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="card border-0 shadow p-5 text-center" style="background: #1e293b; color: #f1f5f9;">
+        <h4>Perfil não encontrado</h4>
+        <p style="color: #94a3b8;">Contate o administrador.</p>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

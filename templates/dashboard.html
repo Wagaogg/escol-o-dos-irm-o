@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Início - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="mb-5">
+        <h1 class="fw-bold" style="color: #f1f5f9;">🏠 Início</h1>
+        <p style="color: #94a3b8;">Bem-vindo, <strong style="color: #facc15;">{{ usuario }}</strong>!</p>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- ADMIN / DIRETOR -->
+    <!-- ========================================= -->
+    {% if tipo in ['admin', 'diretor'] %}
+
+    <div class="row g-4">
+
+        <!-- Alunos -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">👨‍🎓</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #60A5FA;">{{ total_alunos }}</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Alunos</div>
+                </div>
+                <a href="{{ url_for('alunos.listar') }}" class="btn btn-primary mt-3 w-100">Ver Alunos</a>
+            </div>
+        </div>
+
+        <!-- Professores -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">👨‍🏫</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #34D399;">{{ total_professores }}</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Professores</div>
+                </div>
+                <a href="{{ url_for('professores.listar') }}" class="btn btn-success mt-3 w-100">Ver Professores</a>
+            </div>
+        </div>
+
+        <!-- Biblioteca -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">📚</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #FBBF24;">{{ disponiveis }}</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Livros disponíveis</div>
+                </div>
+                <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning mt-3 w-100">Ver Biblioteca</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================= -->
+    <!-- PROFESSOR (VÊ ALUNOS, BIBLIOTECA, LANÇAR NOTA) -->
+    <!-- ========================================= -->
+    {% elif tipo == 'professor' %}
+
+    <div class="row g-4">
+
+        <!-- Alunos (filtrados pelas turmas dele) -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">👨‍🎓</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #60A5FA;">{{ total_alunos }}</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Meus Alunos</div>
+                </div>
+                <a href="{{ url_for('alunos.listar') }}" class="btn btn-primary mt-3 w-100">Ver Alunos</a>
+            </div>
+        </div>
+
+        <!-- Biblioteca -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">📚</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #FBBF24;">{{ disponiveis }}</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Livros disponíveis</div>
+                </div>
+                <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning mt-3 w-100">Ver Biblioteca</a>
+            </div>
+        </div>
+
+        <!-- Lançar Nota -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">📝</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #A78BFA;">Lançar</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Notas</div>
+                </div>
+                <a href="{{ url_for('notas.lancar_nota') }}" class="btn btn-primary mt-3 w-100">📝 Lançar Nota</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================= -->
+    <!-- ALUNO -->
+    <!-- ========================================= -->
+    {% elif tipo == 'aluno' %}
+
+    <div class="row g-4">
+
+        <!-- Biblioteca -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">📚</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #FBBF24;">{{ disponiveis }}</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Livros disponíveis</div>
+                </div>
+                <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning mt-3 w-100">Ver Biblioteca</a>
+            </div>
+        </div>
+
+        <!-- Meu Perfil -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">👤</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #60A5FA;">Perfil</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Suas informações</div>
+                </div>
+                <a href="{{ url_for('meu_perfil.meu_perfil') }}" class="btn btn-primary mt-3 w-100">Ver Perfil</a>
+            </div>
+        </div>
+
+        <!-- Boletim -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">📊</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #34D399;">Boletim</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Suas notas</div>
+                </div>
+                {% if aluno_logado %}
+                    <a href="{{ url_for('notas.boletim', aluno_id=aluno_logado.id) }}" class="btn btn-success mt-3 w-100">📊 Ver Boletim</a>
+                {% else %}
+                    <button class="btn btn-secondary mt-3 w-100" disabled>Perfil incompleto</button>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+        <div class="alert alert-warning">Tipo de usuário não reconhecido.</div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

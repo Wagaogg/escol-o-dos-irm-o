@@ -1,0 +1,93 @@
+[
+    {
+        "id": 3,
+        "nome": "ChatGPT ClaudiosoN do DeeP SeeK da MetA da SilvA",
+        "matricula": "676967696769",
+        "data_nascimento": "06/12/2026",
+        "serie": "",
+        "turma": "Exaltasamba",
+        "email": "claude@gemini.chatgpt.ia",
+        "telefone": "40028922",
+        "foto": "uploads/foto_aluno_3_chat_gpt_.jpg",
+        "notas": [],
+        "responsaveis": [
+            {
+                "nome": "Claudionildo da Silva",
+                "telefone": "67",
+                "parentesco": "pau"
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "nome": "julio da silva cariani ",
+        "matricula": "32675413546782588",
+        "data_nascimento": "04/12/0124",
+        "serie": "1º Ano",
+        "turma": "99° roblox",
+        "email": "julio@gmail.com",
+        "telefone": "4756687464678683867",
+        "foto": "uploads/foto_aluno_5_1a5a61164d0f93ddcbdb79a6c9876e25.jpg",
+        "notas": [
+            {
+                "disciplina": "Ciências",
+                "nota": 9.0,
+                "bimestre": 1
+            },
+            {
+                "disciplina": "Matemática",
+                "nota": 2.0,
+                "bimestre": 1
+            },
+            {
+                "disciplina": "Matemática",
+                "bimestre": 2,
+                "nota": 10.0
+            },
+            {
+                "disciplina": "Ciências",
+                "bimestre": 2,
+                "nota": 2.0
+            }
+        ],
+        "responsaveis": [
+            {
+                "nome": "cariano da silvo julião",
+                "telefone": "35143684839463543",
+                "parentesco": "pai"
+            }
+        ]
+    },
+    {
+        "id": 7,
+        "nome": "Mz",
+        "matricula": "pinto(feijão em ingles)",
+        "data_nascimento": "2026-06-23",
+        "serie": "1º Ano",
+        "turma": "99° roblox",
+        "email": "mz@mz",
+        "telefone": "1240028922",
+        "foto": "uploads/foto_7_79395780bc6b969701e34513ee24a2c9.jpg",
+        "notas": [],
+        "responsaveis": [
+            {
+                "nome": "Jesus Cristo",
+                "telefone": "--666",
+                "parentesco": "Sim"
+            }
+        ]
+    },
+    {
+        "id": 11,
+        "nome": "davy jones do mal",
+        "matricula": "MAT0011",
+        "data_nascimento": null,
+        "serie": null,
+        "turma": null,
+        "email": "davyjonesdomal@gmail.com",
+        "telefone": null,
+        "foto": "uploads/foto_aluno_11_images_1.jpg",
+        "notas": [],
+        "responsaveis": []
+    }
+]

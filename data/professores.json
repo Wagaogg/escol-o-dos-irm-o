@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "nome": "Marques Moreira de Sousa",
+        "email": "marques@escola.com",
+        "telefone": "(12) 98888-0001",
+        "materia": "Computação",
+        "turmas": "3A, 3B",
+        "foto": null,
+        "disciplinas": [
+            "Computação"
+        ],
+        "turmas_lista": [
+            "3A",
+            "3B"
+        ]
+    },
+    {
+        "id": 2,
+        "nome": "bianchi",
+        "email": "antiisraelita@gmail.com",
+        "telefone": "1199194534",
+        "materia": "Etica imoralista",
+        "turmas": "1A, 5A, 99° the choice",
+        "foto": null,
+        "disciplinas": [
+            "Etica imoralista"
+        ],
+        "turmas_lista": [
+            "1A",
+            "5A",
+            "99° the choice"
+        ]
+    },
+    {
+        "id": 3,
+        "nome": "Claudionildo da Silva",
+        "email": "marketing@anthropic.com",
+        "telefone": "67",
+        "materia": "POOS",
+        "turmas": "99° roblox",
+        "foto": null,
+        "disciplinas": [
+            "POOS"
+        ],
+        "turmas_lista": [
+            "99° roblox"
+        ]
+    }
+]

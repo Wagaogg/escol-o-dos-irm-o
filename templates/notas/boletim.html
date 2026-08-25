@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Boletim - {{ aluno.nome }}{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">📊 Boletim</h1>
+            <p style="color: #94a3b8;">{{ aluno.nome }} ({{ aluno.matricula }}) - {{ aluno.turma or 'Sem turma' }}</p>
+        </div>
+        <!-- CORRIGIDO: dashboard.home → dashboard.index -->
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card border-0 shadow p-4" style="background: #1e293b; color: #f1f5f9;">
+        <h4 class="fw-bold mb-4" style="color: #f1f5f9;">📝 Notas por Bimestre</h4>
+
+        {% if dados_notas %}
+        <div class="table-responsive">
+            <table class="table table-bordered" style="background: #1e293b; color: #f1f5f9;">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="color: #f1f5f9;">Disciplina</th>
+                        <th style="color: #f1f5f9;">1º Bim</th>
+                        <th style="color: #f1f5f9;">2º Bim</th>
+                        <th style="color: #f1f5f9;">3º Bim</th>
+                        <th style="color: #f1f5f9;">4º Bim</th>
+                        <th style="color: #f1f5f9;">Média Final</th>
+                        <th style="color: #f1f5f9;">Situação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for disciplina, bimestres in dados_notas.items() %}
+                    <tr>
+                        <td><strong style="color: #facc15;">{{ disciplina }}</strong></td>
+                        <td style="color: #f1f5f9;">{{ bimestres[1] if bimestres[1] is not none else '-' }}</td>
+                        <td style="color: #f1f5f9;">{{ bimestres[2] if bimestres[2] is not none else '-' }}</td>
+                        <td style="color: #f1f5f9;">{{ bimestres[3] if bimestres[3] is not none else '-' }}</td>
+                        <td style="color: #f1f5f9;">{{ bimestres[4] if bimestres[4] is not none else '-' }}</td>
+                        <td>
+                            {% if medias_disciplinas[disciplina] is not none %}
+                                <strong style="color: #facc15;">{{ medias_disciplinas[disciplina] }}</strong>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Incompleto</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if medias_disciplinas[disciplina] is not none %}
+                                {% if medias_disciplinas[disciplina] >= 6 %}
+                                    <span class="badge bg-success">Aprovado</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Reprovado</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-secondary">Incompleto</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="table-secondary">
+                    <tr class="fw-bold">
+                        <td colspan="5" class="text-end" style="color: #f1f5f9;">Média Geral</td>
+                        <td colspan="2">
+                            {% if media_geral is not none %}
+                                <span style="color: #facc15; font-size: 1.1rem;">{{ media_geral }}</span>
+                                <br>
+                                <span class="badge {% if situacao == 'Aprovado' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ situacao }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark" style="font-size: 1rem;">Incompleto</span>
+                                <br>
+                                <small style="color: #94a3b8;">Aguardando notas de todas as disciplinas</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: #94a3b8;">Nenhuma nota lançada ainda.</p>
+        {% endif %}
+
+        <div class="mt-3">
+            <small style="color: #64748b;">* A média é calculada apenas quando todas as 4 notas do bimestre estão lançadas.</small>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
