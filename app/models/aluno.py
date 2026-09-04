@@ -1,72 +1,34 @@
-class Aluno:
-    def __init__(self, id, nome, matricula, data_nascimento=None, serie=None, turma=None,
-                 email=None, telefone=None, foto=None, notas=None, responsaveis=None):
-        self.id = id
-        self.nome = nome
-        self.matricula = matricula
-        self.data_nascimento = data_nascimento
-        self.serie = serie
-        self.turma = turma
-        self.email = email
-        self.telefone = telefone
-        self.foto = foto
-        self.notas = notas if notas is not None else []
-        self.responsaveis = responsaveis if responsaveis is not None else []
+from app import db
+from datetime import datetime
 
-    def adicionar_nota(self, disciplina, bimestre, nota):
-        self.notas.append({
-            "disciplina": disciplina,
-            "bimestre": bimestre,
-            "nota": nota
-        })
-
-    def obter_notas_por_disciplina(self, disciplina):
-        return [n["nota"] for n in self.notas if n["disciplina"] == disciplina]
-
-    def calcular_media_disciplina(self, disciplina):
-        notas = self.obter_notas_por_disciplina(disciplina)
-        if len(notas) == 4:
-            return round(sum(notas) / 4, 2)
-        return None
-
-    def calcular_media_geral(self):
-        disciplinas = set(n["disciplina"] for n in self.notas)
-        medias = []
-        for d in disciplinas:
-            media = self.calcular_media_disciplina(d)
-            if media is not None:
-                medias.append(media)
-        if not medias:
-            return None
-        return round(sum(medias) / len(medias), 2)
-
+class Aluno(db.Model):
+    __tablename__ = 'alunos'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), unique=True, nullable=False)
+    matricula = db.Column(db.String(50), unique=True, nullable=False)
+    data_nascimento = db.Column(db.Date, nullable=True)
+    serie = db.Column(db.String(20), nullable=True)
+    turma = db.Column(db.String(20), nullable=True)
+    telefone = db.Column(db.String(20), nullable=True)
+    responsaveis = db.Column(db.Text, nullable=True)  # JSON string
+    notas = db.Column(db.Text, nullable=True)  # JSON string
+    
+    usuario = db.relationship('Usuario', backref='aluno_rel', uselist=False, lazy=True)
+    
     def to_dict(self):
+        import json
         return {
             "id": self.id,
-            "nome": self.nome,
+            "usuario_id": self.usuario_id,
+            "nome": self.usuario.nome if self.usuario else None,
+            "email": self.usuario.email if self.usuario else None,
             "matricula": self.matricula,
-            "data_nascimento": self.data_nascimento,
+            "data_nascimento": self.data_nascimento.strftime("%d/%m/%Y") if self.data_nascimento else None,
             "serie": self.serie,
             "turma": self.turma,
-            "email": self.email,
             "telefone": self.telefone,
-            "foto": self.foto,
-            "notas": self.notas,
-            "responsaveis": self.responsaveis
+            "responsaveis": json.loads(self.responsaveis) if self.responsaveis else [],
+            "notas": json.loads(self.notas) if self.notas else [],
+            "foto": self.usuario.foto if self.usuario else None
         }
-
-    @classmethod
-    def from_dict(cls, dados):
-        return cls(
-            id=dados.get("id"),
-            nome=dados.get("nome"),
-            matricula=dados.get("matricula"),
-            data_nascimento=dados.get("data_nascimento"),
-            serie=dados.get("serie"),
-            turma=dados.get("turma"),
-            email=dados.get("email"),
-            telefone=dados.get("telefone"),
-            foto=dados.get("foto"),
-            notas=dados.get("notas", []),
-            responsaveis=dados.get("responsaveis", [])
-        )

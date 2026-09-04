@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from app.utils import carregar_json, salvar_json
+from app import db
+from app.models.usuario import Usuario
+from app.models.aluno import Aluno
 from functools import wraps
 
 auth_bp = Blueprint('auth', __name__)
@@ -10,7 +12,7 @@ auth_bp = Blueprint('auth', __name__)
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'usuario' not in session:
+        if 'usuario_id' not in session:
             flash('Faça login para acessar esta página.', 'danger')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
@@ -21,7 +23,7 @@ def login_required(f):
 # =========================
 @auth_bp.route("/")
 def home():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     return redirect(url_for('dashboard.index'))
 
@@ -38,14 +40,16 @@ def autenticar():
     email = request.form.get("email")
     senha = request.form.get("senha")
     
-    # Carrega usuários do JSON
-    usuarios = carregar_json("usuarios.json")
-    for usuario in usuarios:
-        if usuario["email"] == email and usuario["senha"] == senha:
-            session["usuario"] = usuario["nome"]
-            session["tipo"] = usuario["tipo"]
-            session["email"] = usuario["email"]
-            return redirect(url_for('dashboard.index'))
+    # Busca usuário no SQLite
+    usuario = Usuario.query.filter_by(email=email).first()
+    
+    if usuario and usuario.verificar_senha(senha):
+        session.permanent = True
+        session['usuario_id'] = usuario.id
+        session['usuario'] = usuario.nome
+        session['email'] = usuario.email
+        session['tipo'] = usuario.tipo
+        return redirect(url_for('dashboard.index'))
     
     flash("Email ou senha inválidos.", "danger")
     return redirect(url_for('auth.login', erro=1))
@@ -64,41 +68,31 @@ def criar_conta():
     senha = request.form.get("senha")
     tipo = "aluno"
     
-    # Carrega usuários do JSON
-    usuarios = carregar_json("usuarios.json")
-    for u in usuarios:
-        if u["email"] == email:
-            flash("Este email já está em uso.", "danger")
-            return render_template("auth/cadastro.html", erro=1)
+    # Verifica se o email já existe
+    usuario_existente = Usuario.query.filter_by(email=email).first()
+    if usuario_existente:
+        flash("Este email já está em uso.", "danger")
+        return render_template("auth/cadastro.html", erro=1)
     
-    # Cria usuário no JSON
-    novo_usuario = {
-        "nome": nome,
-        "email": email,
-        "senha": senha,
-        "tipo": tipo
-    }
-    usuarios.append(novo_usuario)
-    salvar_json("usuarios.json", usuarios)
+    # Cria usuário no SQLite
+    novo_usuario = Usuario(
+        nome=nome,
+        email=email,
+        tipo=tipo
+    )
+    novo_usuario.senha_criptografada = senha  # criptografa a senha
+    db.session.add(novo_usuario)
+    db.session.flush()  # para pegar o ID
     
-    # Cria aluno automaticamente no JSON
-    alunos = carregar_json("alunos.json")
-    novo_id = max([a["id"] for a in alunos], default=0) + 1
-    novo_aluno = {
-        "id": novo_id,
-        "nome": nome,
-        "matricula": f"MAT{novo_id:04d}",
-        "email": email,
-        "data_nascimento": None,
-        "serie": None,
-        "turma": None,
-        "telefone": None,
-        "foto": None,
-        "notas": [],
-        "responsaveis": []
-    }
-    alunos.append(novo_aluno)
-    salvar_json("alunos.json", alunos)
+    # Cria aluno automaticamente no SQLite
+    novo_aluno = Aluno(
+        usuario_id=novo_usuario.id,
+        matricula=f"MAT{novo_usuario.id:04d}",
+        responsaveis="[]",
+        notas="[]"
+    )
+    db.session.add(novo_aluno)
+    db.session.commit()
     
     flash("Conta criada com sucesso! Faça login.", "success")
     return redirect(url_for('auth.login'))

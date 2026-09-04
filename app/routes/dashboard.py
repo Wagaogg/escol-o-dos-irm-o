@@ -1,5 +1,8 @@
 from flask import Blueprint, render_template, session, redirect, url_for
-from app.utils import carregar_json, carregar_alunos, carregar_professores
+from app.models.usuario import Usuario
+from app.models.aluno import Aluno
+from app.models.professor import Professor
+from app.models.livro import Livro
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -23,22 +26,20 @@ def is_aluno():
 # =========================
 @dashboard_bp.route("/dashboard")
 def index():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     
-    alunos = carregar_alunos()
-    professores = carregar_professores()
-    livros = carregar_json("livros.json")
-    
-    total_alunos = len(alunos)
-    total_professores = len(professores)
+    # Consultas ao SQLite
+    total_alunos = Aluno.query.count()
+    total_professores = Professor.query.count()
+    livros = Livro.query.all()
     total_livros = len(livros)
-    disponiveis = len([l for l in livros if not l.get("emprestado", False)])
+    disponiveis = sum(1 for l in livros if l.estoque > 0)
     
     aluno_logado = None
     if is_aluno():
-        email = session.get("email", "")
-        aluno_logado = next((a for a in alunos if (a.email or "").lower() == email.lower()), None)
+        usuario_id = session.get('usuario_id')
+        aluno_logado = Aluno.query.filter_by(usuario_id=usuario_id).first()
     
     return render_template(
         "dashboard.html",

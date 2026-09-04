@@ -1,6 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from app import db
+from app.models.livro import Livro
+from app.models.aluno import Aluno
+from app.models.usuario import Usuario
 from datetime import datetime, timedelta
-from app.utils import carregar_json, salvar_json, carregar_alunos, formatar_data_br
+import json
 
 biblioteca_bp = Blueprint('biblioteca', __name__)
 
@@ -19,74 +23,87 @@ def is_professor():
 def is_aluno():
     return session.get("tipo") == "aluno"
 
+def formatar_data_br(data):
+    if not data:
+        return "-"
+    return data.strftime("%d/%m/%Y")
+
 # =========================
 # BIBLIOTECA - LISTAR LIVROS
 # =========================
 @biblioteca_bp.route("/biblioteca")
 def listar():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     
-    livros = carregar_json("livros.json")
+    # Busca todos os livros
+    livros = Livro.query.all()
+    
+    # Filtros
     busca = request.args.get("busca", "").lower()
     filtro = request.args.get("filtro", "todos")
     
     resultado = livros
     if busca:
-        resultado = [l for l in resultado if busca in l["titulo"].lower() or busca in l.get("autor", "").lower()]
+        resultado = [l for l in resultado if busca in l.titulo.lower() or busca in (l.autor or "").lower()]
     if filtro == "disponivel":
-        resultado = [l for l in resultado if l.get("estoque", 0) > 0]
+        resultado = [l for l in resultado if l.estoque > 0]
     elif filtro == "emprestado":
-        resultado = [l for l in resultado if l.get("estoque", 0) == 0]
+        resultado = [l for l in resultado if l.estoque == 0]
     
+    # Nome do aluno logado (para preencher modal)
     nome_aluno_logado = None
-    email_aluno_logado = None
     if is_aluno():
-        email = session.get("email", "")
-        alunos = carregar_alunos()
-        aluno = next((a for a in alunos if (a.email or "").lower() == email.lower()), None)
-        if aluno:
-            nome_aluno_logado = aluno.nome
-            email_aluno_logado = aluno.email
-
+        usuario_id = session.get('usuario_id')
+        aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
+        if aluno and aluno.usuario:
+            nome_aluno_logado = aluno.usuario.nome
+    
     # Verifica se o aluno já tem um livro emprestado
     aluno_tem_livro = False
     if is_aluno():
-        for livro in resultado:
-            if livro.get("emprestado") and livro.get("emprestado_para") == session.get("usuario"):
+        usuario_id = session.get('usuario_id')
+        aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
+        if aluno:
+            livro_emprestado = Livro.query.filter_by(emprestado=True, emprestado_para=aluno.usuario.nome).first()
+            if livro_emprestado:
                 aluno_tem_livro = True
-                break
-
-    usuario_atual = session.get("usuario", "").strip().lower()
-    email_atual = session.get("email", "").strip().lower()
-    todos_alunos = carregar_alunos()
-
+    
+    # Prepara dados para o template
+    livros_lista = []
     for livro in resultado:
-        emprestado_para = (livro.get("emprestado_para") or "").strip().lower()
-        aluno_do_livro = next((a for a in todos_alunos if a.nome and a.nome.strip().lower() == emprestado_para), None)
-        email_do_aluno = aluno_do_livro.email.lower() if aluno_do_livro and aluno_do_livro.email else ""
-
-        livro["pode_devolver"] = (
-            livro.get("emprestado") and (
-                is_staff() or
-                (is_aluno() and email_do_aluno == email_atual)
-            )
-        )
+        # Verifica se o livro está emprestado para o usuário atual
+        pode_devolver = False
+        if livro.emprestado and livro.emprestado_para:
+            if is_staff():
+                pode_devolver = True
+            elif is_aluno():
+                usuario_id = session.get('usuario_id')
+                aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
+                if aluno and aluno.usuario and aluno.usuario.nome == livro.emprestado_para:
+                    pode_devolver = True
         
-        livro["pode_emprestar"] = (
-            livro.get("estoque", 0) > 0 and
-            (is_staff() or (is_aluno() and not aluno_tem_livro))
-        )
-        livro["estoque_display"] = livro.get("estoque", 0)
-        
-        if livro.get("data_devolucao"):
-            livro["data_devolucao_br"] = formatar_data_br(livro["data_devolucao"])
-        else:
-            livro["data_devolucao_br"] = "-"
-
+        livros_lista.append({
+            "id": livro.id,
+            "titulo": livro.titulo,
+            "autor": livro.autor,
+            "editora": livro.editora,
+            "ano": livro.ano,
+            "genero": livro.genero,
+            "quantidade": livro.quantidade,
+            "estoque": livro.estoque,
+            "estoque_display": livro.estoque,
+            "emprestado": livro.emprestado,
+            "emprestado_para": livro.emprestado_para,
+            "data_devolucao": livro.data_devolucao,
+            "data_devolucao_br": formatar_data_br(livro.data_devolucao),
+            "pode_devolver": pode_devolver,
+            "pode_emprestar": (livro.estoque > 0 and (is_staff() or (is_aluno() and not aluno_tem_livro)))
+        })
+    
     return render_template(
         "biblioteca/listar.html",
-        livros=resultado,
+        livros=livros_lista,
         busca=busca,
         filtro=filtro,
         tipo=session.get("tipo"),
@@ -98,7 +115,7 @@ def listar():
 # =========================
 @biblioteca_bp.route("/biblioteca/cadastrar")
 def cadastrar_livro():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     if not is_admin():
         flash("Apenas administradores podem cadastrar livros.", "danger")
@@ -107,23 +124,21 @@ def cadastrar_livro():
 
 @biblioteca_bp.route("/biblioteca/salvar", methods=["POST"])
 def salvar_livro():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     if not is_admin():
         flash("Apenas administradores podem cadastrar livros.", "danger")
         return redirect(url_for('biblioteca.listar'))
     
-    livros = carregar_json("livros.json")
-    novo_id = max([l["id"] for l in livros], default=0) + 1
+    titulo = request.form.get("titulo")
+    autor = request.form.get("autor")
+    editora = request.form.get("editora")
+    ano = request.form.get("ano")
+    genero = request.form.get("genero")
     
-    ano = request.form.get("ano", "").strip()
-    if not ano or not ano.isdigit():
-        flash("Ano de publicação inválido. Use apenas números (ex: 2024).", "danger")
-        return redirect(url_for('biblioteca.cadastrar_livro'))
-    
-    ano_int = int(ano)
-    if ano_int < 1000 or ano_int > 9999:
-        flash("Ano de publicação inválido. Use um ano entre 1000 e 9999.", "danger")
+    # Valida ano
+    if ano and not ano.isdigit():
+        flash("Ano de publicação inválido. Use apenas números.", "danger")
         return redirect(url_for('biblioteca.cadastrar_livro'))
     
     try:
@@ -142,23 +157,23 @@ def salvar_livro():
     except:
         prazo_devolucao = 7
     
-    novo = {
-        "id": novo_id,
-        "titulo": request.form.get("titulo"),
-        "autor": request.form.get("autor"),
-        "editora": request.form.get("editora"),
-        "ano": str(ano_int),
-        "genero": request.form.get("genero"),
-        "quantidade": quantidade,
-        "estoque": quantidade,
-        "prazo_devolucao": prazo_devolucao,
-        "emprestado": False,
-        "emprestado_para": None,
-        "data_emprestimo": None,
-        "data_devolucao": None
-    }
-    livros.append(novo)
-    salvar_json("livros.json", livros)
+    novo_livro = Livro(
+        titulo=titulo,
+        autor=autor,
+        editora=editora,
+        ano=ano,
+        genero=genero,
+        quantidade=quantidade,
+        estoque=quantidade,
+        prazo_devolucao=prazo_devolucao,
+        emprestado=False,
+        emprestado_para=None,
+        data_emprestimo=None,
+        data_devolucao=None
+    )
+    db.session.add(novo_livro)
+    db.session.commit()
+    
     flash(f"Livro cadastrado com sucesso! {quantidade} exemplar(es) em estoque. Prazo: {prazo_devolucao} dias.", "success")
     return redirect(url_for('biblioteca.listar'))
 
@@ -167,7 +182,7 @@ def salvar_livro():
 # =========================
 @biblioteca_bp.route("/biblioteca/emprestar", methods=["POST"])
 def emprestar_livro():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     
     livro_id = request.form.get("livro_id")
@@ -185,64 +200,48 @@ def emprestar_livro():
         flash("Nome do aluno é obrigatório.", "danger")
         return redirect(url_for('biblioteca.listar'))
     
-    # Verifica se o aluno já tem um livro emprestado
-    if is_aluno():
-        email = session.get("email", "")
-        alunos = carregar_alunos()
-        aluno_logado = next((a for a in alunos if (a.email or "").lower() == email.lower()), None)
-        if not aluno_logado:
-            flash("Aluno não encontrado no sistema.", "danger")
-            return redirect(url_for('biblioteca.listar'))
-        
-        livros = carregar_json("livros.json")
-        for l in livros:
-            if l.get("emprestado_para") == nome_aluno and l.get("emprestado"):
-                flash(f"O aluno {nome_aluno} já possui um livro emprestado.", "danger")
-                return redirect(url_for('biblioteca.listar'))
-        
-        nome_correto = aluno_logado.nome.strip().lower()
-        nome_digitado = nome_aluno.strip().lower()
-        if nome_digitado != nome_correto:
-            flash("Aluno só pode emprestar livros para si mesmo.", "danger")
-            return redirect(url_for('biblioteca.listar'))
-    
-    livros = carregar_json("livros.json")
-    livro_encontrado = None
-    for l in livros:
-        if l["id"] == livro_id:
-            livro_encontrado = l
-            break
-    
-    if not livro_encontrado:
+    livro = Livro.query.get(livro_id)
+    if not livro:
         flash("Livro não encontrado.", "danger")
         return redirect(url_for('biblioteca.listar'))
     
-    if livro_encontrado.get("estoque", 0) <= 0:
+    if livro.estoque <= 0:
         flash("Este livro não tem exemplares disponíveis.", "danger")
         return redirect(url_for('biblioteca.listar'))
     
+    # Verifica se o aluno já tem um livro emprestado (se for aluno)
+    if is_aluno():
+        usuario_id = session.get('usuario_id')
+        aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
+        if not aluno:
+            flash("Aluno não encontrado no sistema.", "danger")
+            return redirect(url_for('biblioteca.listar'))
+        
+        # Verifica se o aluno já tem livro emprestado
+        livro_emprestado = Livro.query.filter_by(emprestado=True, emprestado_para=aluno.usuario.nome).first()
+        if livro_emprestado:
+            flash(f"Você já possui um livro emprestado: {livro_emprestado.titulo}. Devolva antes de pegar outro.", "danger")
+            return redirect(url_for('biblioteca.listar'))
+        
+        # Verifica se o nome digitado é o próprio aluno
+        if nome_aluno.lower() != aluno.usuario.nome.lower():
+            flash("Aluno só pode emprestar livros para si mesmo.", "danger")
+            return redirect(url_for('biblioteca.listar'))
+    
     # Realiza empréstimo
-    livro_encontrado["estoque"] = livro_encontrado.get("estoque", 0) - 1
-    livro_encontrado["emprestado"] = True
-    livro_encontrado["emprestado_para"] = nome_aluno
-    livro_encontrado["data_emprestimo"] = datetime.now().strftime("%Y-%m-%d")
+    livro.estoque -= 1
+    livro.emprestado = True
+    livro.emprestado_para = nome_aluno
+    livro.data_emprestimo = datetime.now().date()
     
-    try:
-        prazo_dias = livro_encontrado.get("prazo_devolucao", 7)
-        prazo_dias = int(prazo_dias)
-        if prazo_dias < 1:
-            prazo_dias = 1
-        elif prazo_dias > 365:
-            prazo_dias = 365
-    except (ValueError, TypeError):
-        prazo_dias = 7
+    # Calcula data de devolução com base no prazo
+    prazo_dias = livro.prazo_devolucao or 7
+    livro.data_devolucao = datetime.now().date() + timedelta(days=prazo_dias)
     
-    data_devolucao = datetime.now() + timedelta(days=prazo_dias)
-    livro_encontrado["data_devolucao"] = data_devolucao.strftime("%Y-%m-%d")
+    db.session.commit()
     
-    salvar_json("livros.json", livros)
-    data_br = data_devolucao.strftime("%d/%m/%Y")
-    flash(f"Empréstimo realizado! {livro_encontrado['titulo']} - Devolver até: {data_br}.", "success")
+    data_br = livro.data_devolucao.strftime("%d/%m/%Y")
+    flash(f"Empréstimo realizado! {livro.titulo} - Devolver até: {data_br}.", "success")
     return redirect(url_for('biblioteca.listar'))
 
 # =========================
@@ -250,40 +249,36 @@ def emprestar_livro():
 # =========================
 @biblioteca_bp.route("/biblioteca/<int:livro_id>/devolver", methods=["POST"])
 def devolver_livro(livro_id):
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     
-    livros = carregar_json("livros.json")
-    livro = next((l for l in livros if l["id"] == livro_id), None)
+    livro = Livro.query.get(livro_id)
     if not livro:
         flash("Livro não encontrado.", "danger")
         return redirect(url_for('biblioteca.listar'))
     
-    if not livro.get("emprestado"):
+    if not livro.emprestado:
         flash("Este livro não está emprestado.", "warning")
         return redirect(url_for('biblioteca.listar'))
     
-    email_atual = session.get("email", "").strip().lower()
-    emprestado_para = (livro.get("emprestado_para") or "").strip().lower()
-    
-    todos_alunos = carregar_alunos()
-    aluno_do_livro = next((a for a in todos_alunos if a.nome and a.nome.strip().lower() == emprestado_para), None)
-    email_do_aluno = aluno_do_livro.email.lower() if aluno_do_livro and aluno_do_livro.email else ""
-
+    # Verifica permissão
     pode_devolver = False
     if is_staff():
         pode_devolver = True
-    elif is_aluno() and email_do_aluno == email_atual:
-        pode_devolver = True
+    elif is_aluno():
+        usuario_id = session.get('usuario_id')
+        aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
+        if aluno and aluno.usuario and aluno.usuario.nome == livro.emprestado_para:
+            pode_devolver = True
     
     if pode_devolver:
-        livro["emprestado"] = False
-        livro["emprestado_para"] = None
-        livro["data_emprestimo"] = None
-        livro["data_devolucao"] = None
-        livro["estoque"] = livro.get("estoque", 0) + 1
-        salvar_json("livros.json", livros)
-        flash(f"Livro devolvido com sucesso! Estoque atual: {livro['estoque']} exemplar(es).", "success")
+        livro.estoque += 1
+        livro.emprestado = False
+        livro.emprestado_para = None
+        livro.data_emprestimo = None
+        livro.data_devolucao = None
+        db.session.commit()
+        flash(f"Livro devolvido com sucesso! Estoque atual: {livro.estoque} exemplar(es).", "success")
     else:
         flash("Você não tem permissão para devolver este livro.", "danger")
     
@@ -294,14 +289,18 @@ def devolver_livro(livro_id):
 # =========================
 @biblioteca_bp.route("/biblioteca/<int:livro_id>/excluir", methods=["POST"])
 def excluir_livro(livro_id):
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     if not is_admin():
         flash("Apenas administradores podem excluir livros.", "danger")
         return redirect(url_for('biblioteca.listar'))
     
-    livros = carregar_json("livros.json")
-    livros = [l for l in livros if l["id"] != livro_id]
-    salvar_json("livros.json", livros)
+    livro = Livro.query.get(livro_id)
+    if not livro:
+        flash("Livro não encontrado.", "danger")
+        return redirect(url_for('biblioteca.listar'))
+    
+    db.session.delete(livro)
+    db.session.commit()
     flash("Livro excluído com sucesso.", "success")
     return redirect(url_for('biblioteca.listar'))

@@ -12,10 +12,6 @@ class Usuario(db.Model):
     foto = db.Column(db.String(200), nullable=True)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relacionamentos (1-1 com Aluno e Professor)
-    aluno = db.relationship('Aluno', backref='usuario_rel', uselist=False, lazy=True)
-    professor = db.relationship('Professor', backref='usuario_rel', uselist=False, lazy=True)
-    
     @property
     def senha_criptografada(self):
         return self.senha

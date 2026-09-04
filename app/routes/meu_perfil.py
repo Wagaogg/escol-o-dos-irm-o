@@ -1,9 +1,12 @@
 from flask import Blueprint, render_template, session, flash, redirect, url_for, request, current_app
-from app.utils import carregar_alunos, carregar_professores, carregar_json, salvar_json, salvar_alunos, salvar_professores, allowed_file
+from app import db
+from app.models.usuario import Usuario
 from app.models.aluno import Aluno
 from app.models.professor import Professor
+from app.models.livro import Livro
 from werkzeug.utils import secure_filename
 import os
+import json
 
 meu_perfil_bp = Blueprint('meu_perfil', __name__)
 
@@ -21,69 +24,81 @@ def is_professor():
 # =========================
 @meu_perfil_bp.route("/meu_perfil")
 def meu_perfil():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     
+    usuario_id = session.get('usuario_id')
+    
     if is_aluno():
-        alunos = carregar_alunos()
-        email = session.get("email", "")
-        aluno = next((a for a in alunos if (a.email or "").lower() == email.lower()), None)
+        aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
         if not aluno:
-            aluno = Aluno(
-                id=None,
-                nome=session.get("usuario"),
-                email=session.get("email"),
-                matricula=None,
-                turma=None,
-                serie=None,
-                data_nascimento=None,
-                telefone=None
-            )
-        livros = carregar_json("livros.json")
-        livros_emprestados = [
-            l for l in livros
-            if l.get("emprestado") and (l.get("emprestado_para") or "").strip().lower() == (aluno.nome or "").strip().lower()
-        ]
+            flash("Perfil de aluno não encontrado.", "danger")
+            return redirect(url_for('dashboard.index'))
+        
+        # Carrega dados do JSON (responsaveis e notas)
+        responsaveis = json.loads(aluno.responsaveis) if aluno.responsaveis else []
+        notas = json.loads(aluno.notas) if aluno.notas else []
+        
+        # Livros emprestados (SQLite)
+        livros_emprestados = Livro.query.filter_by(emprestado=True, emprestado_para=session.get('usuario')).all()
+        
         return render_template("alunos/meu_perfil.html", 
             usuario=session["usuario"], 
             tipo=session["tipo"], 
-            aluno=aluno, 
+            aluno={
+                "id": aluno.id,
+                "nome": session.get("usuario"),
+                "email": session.get("email"),
+                "matricula": aluno.matricula,
+                "turma": aluno.turma,
+                "serie": aluno.serie,
+                "data_nascimento": aluno.data_nascimento.strftime("%d/%m/%Y") if aluno.data_nascimento else None,
+                "telefone": aluno.telefone,
+                "foto": Usuario.query.get(usuario_id).foto,
+                "responsaveis": responsaveis,
+                "notas": notas
+            }, 
             livros_emprestados=livros_emprestados, 
-            foto=aluno.foto
+            foto=Usuario.query.get(usuario_id).foto
         )
     
     elif is_professor():
-        professores = carregar_professores()
-        email = session.get("email", "")
-        professor = next((p for p in professores if (p.email or "").lower() == email.lower()), None)
+        professor = Professor.query.filter_by(usuario_id=usuario_id).first()
         if not professor:
-            professor = Professor(
-                id=None,
-                nome=session.get("usuario"),
-                email=session.get("email"),
-                materia=None,
-                turmas=None,
-                telefone=None
-            )
+            flash("Perfil de professor não encontrado.", "danger")
+            return redirect(url_for('dashboard.index'))
+        
         return render_template("professores/meu_perfil.html", 
             usuario=session["usuario"], 
             tipo=session["tipo"], 
-            professor=professor, 
-            foto=professor.foto
+            professor={
+                "id": professor.id,
+                "nome": session.get("usuario"),
+                "email": session.get("email"),
+                "materia": professor.materia,
+                "turmas": professor.turmas,
+                "telefone": Usuario.query.get(usuario_id).telefone,
+                "foto": Usuario.query.get(usuario_id).foto
+            }, 
+            foto=Usuario.query.get(usuario_id).foto
         )
     else:
-        return redirect(url_for('dashboard.home'))
+        return redirect(url_for('dashboard.index'))
 
 # =========================
 # UPLOAD DE FOTO
 # =========================
 @meu_perfil_bp.route("/upload_foto", methods=["POST"])
 def upload_foto():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
-    if not (is_aluno() or is_professor()):
-        flash("Apenas alunos e professores podem enviar foto.", "danger")
-        return redirect(url_for('dashboard.home'))
+    
+    usuario_id = session.get('usuario_id')
+    usuario = Usuario.query.get(usuario_id)
+    
+    if not usuario:
+        flash("Usuário não encontrado.", "danger")
+        return redirect(url_for('meu_perfil.meu_perfil'))
     
     if 'foto' not in request.files:
         flash("Nenhum arquivo selecionado.", "danger")
@@ -94,34 +109,20 @@ def upload_foto():
         flash("Nenhum arquivo selecionado.", "danger")
         return redirect(url_for('meu_perfil.meu_perfil'))
     
-    if not allowed_file(file.filename):
-        flash("Formato inválido. Use apenas JPG ou PDF.", "danger")
+    # Validação de extensão
+    allowed_extensions = {'jpg', 'jpeg', 'png', 'gif', 'pdf'}
+    if not ('.' in file.filename and file.filename.rsplit('.', 1)[1].lower() in allowed_extensions):
+        flash("Formato inválido. Use JPG, PNG, GIF ou PDF.", "danger")
         return redirect(url_for('meu_perfil.meu_perfil'))
     
-    email = session.get("email", "")
-    if is_aluno():
-        alunos = carregar_alunos()
-        usuario = next((a for a in alunos if (a.email or "").lower() == email.lower()), None)
-        if not usuario:
-            flash("Usuário não encontrado.", "danger")
-            return redirect(url_for('meu_perfil.meu_perfil'))
-        filename = secure_filename(f"foto_aluno_{usuario.id}_{file.filename}")
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        usuario.foto = f"uploads/{filename}"
-        salvar_alunos(alunos)
+    # Salva o arquivo
+    filename = secure_filename(f"foto_{usuario_id}_{file.filename}")
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
     
-    elif is_professor():
-        professores = carregar_professores()
-        usuario = next((p for p in professores if (p.email or "").lower() == email.lower()), None)
-        if not usuario:
-            flash("Usuário não encontrado.", "danger")
-            return redirect(url_for('meu_perfil.meu_perfil'))
-        filename = secure_filename(f"foto_prof_{usuario.id}_{file.filename}")
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        usuario.foto = f"uploads/{filename}"
-        salvar_professores(professores)
+    # Atualiza o campo foto no SQLite
+    usuario.foto = f"uploads/{filename}"
+    db.session.commit()
     
     flash("Foto atualizada com sucesso!", "success")
     return redirect(url_for('meu_perfil.meu_perfil'))

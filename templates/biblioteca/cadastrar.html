@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Cadastrar Livro - Sistema Escolar{% endblock %}
+{% block title %}Cadastrar Livro - SEApp{% endblock %}
 
 {% block content %}
 
@@ -10,13 +10,15 @@
             <h1 class="fw-bold" style="color: #f1f5f9;">📖 Cadastrar Livro</h1>
             <p style="color: #94a3b8;">Adicione um novo livro ao acervo da biblioteca.</p>
         </div>
-        <a href="{{ url_for('biblioteca') }}" class="btn btn-secondary">← Voltar</a>
+        <!-- CORRIGIDO: biblioteca → biblioteca.listar -->
+        <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-secondary">← Voltar</a>
     </div>
 
     <div class="card shadow border-0" style="background: #1e293b;">
         <div class="card-body p-4">
 
-            <form action="{{ url_for('salvar_livro') }}" method="POST" id="formCadastroLivro">
+            <!-- CORRIGIDO: salvar_livro → biblioteca.salvar_livro -->
+            <form action="{{ url_for('biblioteca.salvar_livro') }}" method="POST">
 
                 <div class="row g-3">
 
@@ -76,7 +78,8 @@
 
                 <div class="mt-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary">✅ Cadastrar Livro</button>
-                    <a href="{{ url_for('biblioteca') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    <!-- CORRIGIDO: biblioteca → biblioteca.listar -->
+                    <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
                 </div>
 
             </form>
@@ -87,34 +90,12 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('formCadastroLivro');
-    form.addEventListener('submit', function(e) {
-        const anoInput = document.querySelector('input[name="ano"]');
-        const ano = anoInput.value.trim();
-        
-        // Verifica se o campo está vazio
-        if (!ano) {
-            alert('O ano de publicação é obrigatório.');
-            e.preventDefault();
-            return;
-        }
-        
-        // Verifica se contém apenas números
-        if (!/^\d+$/.test(ano)) {
-            alert('O ano de publicação deve conter apenas números (ex: 2024).');
-            e.preventDefault();
-            return;
-        }
-        
-        // Verifica se está entre 1000 e 9999
-        const anoNum = parseInt(ano);
-        if (anoNum < 1000 || anoNum > 9999) {
-            alert('Ano de publicação inválido. Use um ano entre 1000 e 9999.');
-            e.preventDefault();
-            return;
-        }
-    });
+document.querySelector('form').addEventListener('submit', function(e) {
+    const ano = document.querySelector('input[name="ano"]').value.trim();
+    if (ano && !/^\d{4}$/.test(ano)) {
+        alert('O ano deve ter 4 dígitos (ex: 2024).');
+        e.preventDefault();
+    }
 });
 </script>
 

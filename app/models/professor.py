@@ -1,39 +1,27 @@
-class Professor:
-    def __init__(self, id, nome, email=None, telefone=None, materia=None, turmas=None,
-                 foto=None, disciplinas=None, turmas_lista=None):
-        self.id = id
-        self.nome = nome
-        self.email = email
-        self.telefone = telefone
-        self.materia = materia          # principal (string) - preenchido automaticamente
-        self.turmas = turmas            # legado (string) - preenchido automaticamente
-        self.foto = foto
-        self.disciplinas = disciplinas if disciplinas is not None else []
-        self.turmas_lista = turmas_lista if turmas_lista is not None else []
+from app import db
+import json
 
+class Professor(db.Model):
+    __tablename__ = 'professores'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), unique=True, nullable=False)
+    materia = db.Column(db.String(100), nullable=True)
+    turmas = db.Column(db.String(200), nullable=True)
+    disciplinas = db.Column(db.Text, nullable=True)  # JSON string
+    turmas_lista = db.Column(db.Text, nullable=True)  # JSON string
+    
+    usuario = db.relationship('Usuario', backref='professor_rel', uselist=False, lazy=True)
+    
     def to_dict(self):
         return {
             "id": self.id,
-            "nome": self.nome,
-            "email": self.email,
-            "telefone": self.telefone,
+            "usuario_id": self.usuario_id,
+            "nome": self.usuario.nome if self.usuario else None,
+            "email": self.usuario.email if self.usuario else None,
             "materia": self.materia,
             "turmas": self.turmas,
-            "foto": self.foto,
-            "disciplinas": self.disciplinas,
-            "turmas_lista": self.turmas_lista
+            "disciplinas": json.loads(self.disciplinas) if self.disciplinas else [],
+            "turmas_lista": json.loads(self.turmas_lista) if self.turmas_lista else [],
+            "foto": self.usuario.foto if self.usuario else None
         }
-
-    @classmethod
-    def from_dict(cls, dados):
-        return cls(
-            id=dados.get("id"),
-            nome=dados.get("nome"),
-            email=dados.get("email"),
-            telefone=dados.get("telefone"),
-            materia=dados.get("materia"),
-            turmas=dados.get("turmas"),
-            foto=dados.get("foto"),
-            disciplinas=dados.get("disciplinas", []),
-            turmas_lista=dados.get("turmas_lista", [])
-        )

@@ -1,6 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from app.utils import carregar_alunos, salvar_alunos
+from app import db
+from app.models.aluno import Aluno
+from app.models.professor import Professor
+from datetime import datetime
+import json
 
+# =========================
+# BLUEPRINT
+# =========================
 notas_bp = Blueprint('notas', __name__)
 
 # =========================
@@ -23,11 +30,11 @@ def is_aluno():
 # =========================
 @notas_bp.route("/notas/lancar", methods=["GET", "POST"])
 def lancar_nota():
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     if not is_professor():
         flash("Apenas professores podem lançar notas.", "danger")
-        return redirect(url_for('dashboard.home'))
+        return redirect(url_for('dashboard.index'))
     
     if request.method == "POST":
         aluno_id = request.form.get("aluno_id")
@@ -52,78 +59,116 @@ def lancar_nota():
             flash("Valores inválidos.", "danger")
             return redirect(url_for('notas.lancar_nota'))
         
-        alunos = carregar_alunos()
-        aluno = next((a for a in alunos if a.id == int(aluno_id)), None)
+        aluno = Aluno.query.get(int(aluno_id))
         if not aluno:
             flash("Aluno não encontrado.", "danger")
             return redirect(url_for('notas.lancar_nota'))
         
-        # Verifica se já existe nota para essa disciplina e bimestre
-        for n in aluno.notas:
+        # Carrega notas do JSON
+        notas = json.loads(aluno.notas) if aluno.notas else []
+        
+        # Verifica duplicata
+        for n in notas:
             if n.get("disciplina", "").lower() == disciplina.lower() and n.get("bimestre") == bimestre:
                 flash(f"Já existe nota para {disciplina} no {bimestre}º bimestre.", "warning")
                 return redirect(url_for('notas.lancar_nota'))
         
-        aluno.adicionar_nota(disciplina, bimestre, nota)
-        salvar_alunos(alunos)
-        flash(f"Nota {nota} lançada para {aluno.nome} em {disciplina} ({bimestre}º bimestre).", "success")
+        # Adiciona nova nota
+        notas.append({
+            "disciplina": disciplina,
+            "bimestre": bimestre,
+            "nota": nota
+        })
+        
+        aluno.notas = json.dumps(notas)
+        db.session.commit()
+        
+        flash(f"Nota {nota} lançada para {aluno.usuario.nome} em {disciplina} ({bimestre}º bimestre).", "success")
         return redirect(url_for('notas.lancar_nota'))
     
     # GET - exibe o formulário
-    alunos = carregar_alunos()
+    alunos = Aluno.query.all()
     disciplinas = ["Matemática", "Português", "Ciências", "História", "Geografia", "Inglês", "Artes", "Educação Física"]
     bimestres = [1, 2, 3, 4]
-    return render_template("notas/lancar.html", alunos=alunos, disciplinas=disciplinas, bimestres=bimestres)
+    
+    alunos_com_nome = []
+    for a in alunos:
+        alunos_com_nome.append({
+            "id": a.id,
+            "nome": a.usuario.nome if a.usuario else "Sem nome",
+            "matricula": a.matricula
+        })
+    
+    return render_template("notas/lancar.html", alunos=alunos_com_nome, disciplinas=disciplinas, bimestres=bimestres)
 
 # =========================
 # BOLETIM
 # =========================
 @notas_bp.route("/boletim/<int:aluno_id>")
 def boletim(aluno_id):
-    if 'usuario' not in session:
+    if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     
-    alunos = carregar_alunos()
-    aluno = next((a for a in alunos if a.id == aluno_id), None)
+    aluno = Aluno.query.get(aluno_id)
     if not aluno:
         flash("Aluno não encontrado.", "danger")
-        return redirect(url_for('dashboard.home'))
+        return redirect(url_for('dashboard.index'))
     
     # Permissões
     if is_aluno():
-        email = session.get("email", "")
-        aluno_logado = next((a for a in alunos if (a.email or "").lower() == email.lower()), None)
+        usuario_id = session.get('usuario_id')
+        aluno_logado = Aluno.query.filter_by(usuario_id=usuario_id).first()
         if not aluno_logado or aluno_logado.id != aluno_id:
             flash("Você só pode ver seu próprio boletim.", "danger")
-            return redirect(url_for('dashboard.home'))
+            return redirect(url_for('dashboard.index'))
     elif not is_staff():
         flash("Acesso negado.", "danger")
-        return redirect(url_for('dashboard.home'))
+        return redirect(url_for('dashboard.index'))
+    
+    # Carrega notas do JSON
+    notas = json.loads(aluno.notas) if aluno.notas else []
     
     # Organiza notas por disciplina e bimestre
-    disciplinas = sorted(set(n["disciplina"] for n in aluno.notas))
+    disciplinas = sorted(set(n["disciplina"] for n in notas))
     dados_notas = {}
     for d in disciplinas:
         dados_notas[d] = {1: None, 2: None, 3: None, 4: None}
-        for n in aluno.notas:
+        for n in notas:
             if n["disciplina"] == d:
                 bim = n.get("bimestre", 1)
                 if 1 <= bim <= 4:
                     dados_notas[d][bim] = n["nota"]
     
-    # Calcula médias
+    # Calcula médias das disciplinas
     medias_disciplinas = {}
     for d in disciplinas:
-        medias_disciplinas[d] = aluno.calcular_media_disciplina(d)
+        notas_d = [n["nota"] for n in notas if n["disciplina"] == d]
+        if len(notas_d) == 4:
+            medias_disciplinas[d] = round(sum(notas_d) / 4, 2)
+        else:
+            medias_disciplinas[d] = None
     
-    media_geral = aluno.calcular_media_geral()
+    # Média geral (apenas disciplinas completas)
+    medias_validas = [m for m in medias_disciplinas.values() if m is not None]
+    media_geral = round(sum(medias_validas) / len(medias_validas), 2) if medias_validas else None
+    
     situacao = None
     if media_geral is not None:
         situacao = "Aprovado" if media_geral >= 6 else "Reprovado"
     
+    # Dados do aluno para o template
+    aluno_info = {
+        "id": aluno.id,
+        "nome": aluno.usuario.nome if aluno.usuario else "Sem nome",
+        "matricula": aluno.matricula,
+        "turma": aluno.turma,
+        "email": aluno.usuario.email if aluno.usuario else "",
+        "foto": aluno.usuario.foto if aluno.usuario else None
+    }
+    
     return render_template(
         "notas/boletim.html",
-        aluno=aluno,
+        aluno=aluno_info,
         dados_notas=dados_notas,
         medias_disciplinas=medias_disciplinas,
         media_geral=media_geral,
