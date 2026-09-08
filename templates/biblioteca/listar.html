@@ -10,9 +10,14 @@
             <h1 class="fw-bold" style="color: #f1f5f9;">📚 Biblioteca</h1>
             <p style="color: #94a3b8;">Acervo de livros disponíveis.</p>
         </div>
-        {% if tipo == "admin" or tipo == "diretor" %}
-        <a href="{{ url_for('biblioteca.cadastrar_livro') }}" class="btn btn-primary">+ Novo Livro</a>
-        {% endif %}
+        <div class="d-flex gap-2">
+            {% if tipo == "admin" or tipo == "diretor" %}
+            <a href="{{ url_for('biblioteca.cadastrar_livro') }}" class="btn btn-primary">+ Novo Livro</a>
+            {% endif %}
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#estatisticasModal">
+                📊 Ver Estatísticas
+            </button>
+        </div>
     </div>
 
     <!-- FILTROS -->
@@ -65,8 +70,6 @@
                                 <td>
                                     {% if livro.emprestado %}
                                         <span class="badge bg-danger">Emprestado</span>
-                                        <br>
-                                        <small style="color: #94a3b8;">para: {{ livro.emprestado_para }}</small>
                                     {% else %}
                                         <span class="badge bg-success">Disponível</span>
                                     {% endif %}
@@ -83,8 +86,8 @@
                                 <td>
                                     <div class="d-flex gap-2 flex-wrap">
 
-                                        <!-- EMPRESTAR -->
-                                        {% if not livro.emprestado and livro.pode_emprestar %}
+                                        <!-- EMPRESTAR (agora só depende de pode_emprestar) -->
+                                        {% if livro.pode_emprestar %}
                                         <button type="button" class="btn btn-sm btn-warning"
                                                 data-bs-toggle="modal" data-bs-target="#modalEmprestar"
                                                 data-livro-id="{{ livro.id }}" data-titulo="{{ livro.titulo }}">
@@ -168,12 +171,33 @@
     </div>
 </div>
 
+<!-- MODAL ESTATÍSTICAS - TOP 5 LIVROS MAIS EMPRESTADOS -->
+<div class="modal fade" id="estatisticasModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background:#1e293b; border:1px solid #334155; color:#f1f5f9;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">📊 Top 5 Livros Mais Emprestados</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <canvas id="graficoPizza" height="250"></canvas>
+                <p class="text-center text-secondary mt-2" id="legendaGrafico">Carregando dados...</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Campos ocultos para o JS -->
 <input type="hidden" id="tipoUsuario" value="{{ session.get('tipo') }}">
 <input type="hidden" id="nomeAluno" value="{{ nome_aluno_logado or '' }}">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    // MODAL DE EMPRÉSTIMO
     const modal = document.getElementById('modalEmprestar');
     if (modal) {
         modal.addEventListener('show.bs.modal', function(event) {
@@ -200,6 +224,68 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+    // GRÁFICO TOP 5 LIVROS EMPRESTADOS
+    const modalEstatisticas = document.getElementById('estatisticasModal');
+    let grafico = null;
+
+    modalEstatisticas.addEventListener('show.bs.modal', function() {
+        fetch('/api/livros_emprestados')
+            .then(response => response.json())
+            .then(data => {
+                const dados = data.dados;
+                const labels = dados.map(item => item.label);
+                const values = dados.map(item => item.value);
+
+                const total = values.reduce((a, b) => a + b, 0);
+                document.getElementById('legendaGrafico').textContent = 
+                    total > 0 ? `Total de exemplares emprestados (top 5): ${total}` : 'Nenhum livro emprestado no momento.';
+
+                if (grafico) grafico.destroy();
+
+                const ctx = document.getElementById('graficoPizza').getContext('2d');
+                grafico = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#f1f5f9',
+                                    font: { size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        let value = context.parsed || 0;
+                                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: ${value} exemplar(es) (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao carregar dados:', error);
+                document.getElementById('legendaGrafico').textContent = 'Erro ao carregar dados.';
+            });
+    });
 });
 </script>
 
