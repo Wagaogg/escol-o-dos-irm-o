@@ -6,9 +6,6 @@ import json
 
 professores_bp = Blueprint('professores', __name__)
 
-# =========================
-# PERMISSÕES
-# =========================
 def is_admin():
     return session.get("tipo") in ["admin", "diretor"]
 
@@ -18,9 +15,6 @@ def is_staff():
 def is_professor():
     return session.get("tipo") == "professor"
 
-# =========================
-# LISTAR PROFESSORES
-# =========================
 @professores_bp.route("/professores")
 def listar():
     if 'usuario_id' not in session:
@@ -29,10 +23,8 @@ def listar():
         flash("Acesso negado.", "danger")
         return redirect(url_for('dashboard.index'))
     
-    # Busca todos os professores
     professores = Professor.query.all()
     
-    # Se for professor, vê apenas o próprio perfil
     if is_professor():
         usuario_id = session.get('usuario_id')
         professor = Professor.query.filter_by(usuario_id=usuario_id).first()
@@ -41,18 +33,17 @@ def listar():
         else:
             professores = []
     
-    # Busca (opcional)
     busca = request.args.get("busca", "").lower()
     if busca:
         professores = [p for p in professores if busca in (p.usuario.nome.lower() if p.usuario else "")]
     
-    # Prepara lista para o template
     professores_lista = []
     for p in professores:
         professores_lista.append({
             "id": p.id,
             "nome": p.usuario.nome if p.usuario else "Sem nome",
-            "email": p.usuario.email if p.usuario else "",
+            "email": p.email or (p.usuario.email if p.usuario else ""),
+            "telefone": p.telefone or "",
             "materia": p.materia,
             "turmas": p.turmas,
             "disciplinas": json.loads(p.disciplinas) if p.disciplinas else [],
@@ -68,9 +59,6 @@ def listar():
         pode_editar=is_admin()
     )
 
-# =========================
-# CADASTRAR PROFESSOR
-# =========================
 @professores_bp.route("/professores/cadastrar")
 def cadastrar():
     if 'usuario_id' not in session:
@@ -92,30 +80,34 @@ def salvar():
     email = request.form.get("email")
     telefone = request.form.get("telefone")
     
-    # Verifica se email já existe
-    if email:
-        usuario_existente = Usuario.query.filter_by(email=email).first()
-        if usuario_existente:
-            flash("Este email já está em uso.", "danger")
-            return redirect(url_for('professores.cadastrar'))
+    # Verifica se já existe um professor com esse email
+    prof_existente = Professor.query.filter(
+        db.func.lower(Professor.email) == email.lower()
+    ).first()
+    if prof_existente:
+        flash("Já existe um professor cadastrado com este email.", "danger")
+        return redirect(url_for('professores.cadastrar'))
     
-    # Cria usuário
-    usuario = Usuario(
-        nome=nome,
-        email=email,
-        tipo="professor"
-    )
-    usuario.senha_criptografada = "temp123"  # senha temporária
-    db.session.add(usuario)
-    db.session.flush()
+    # Verifica se já existe um usuário com esse email
+    usuario = Usuario.query.filter_by(email=email).first()
+    if usuario:
+        # Já existe usuário → vincula
+        usuario.tipo = "professor"
+        usuario.nome = nome
+        db.session.commit()
+        usuario_id = usuario.id
+    else:
+        # Não existe usuário → deixa como NULL (será criado quando ele se cadastrar)
+        usuario_id = None
     
-    # Cria professor
     novo_professor = Professor(
-        usuario_id=usuario.id,
+        usuario_id=usuario_id,
+        email=email,
         materia="",
         turmas="",
         disciplinas="[]",
-        turmas_lista="[]"
+        turmas_lista="[]",
+        telefone=telefone
     )
     db.session.add(novo_professor)
     db.session.commit()
@@ -123,9 +115,6 @@ def salvar():
     flash("Professor cadastrado com sucesso!", "success")
     return redirect(url_for('professores.listar'))
 
-# =========================
-# EDITAR PROFESSOR
-# =========================
 @professores_bp.route("/professores/<int:prof_id>/editar")
 def editar(prof_id):
     if 'usuario_id' not in session:
@@ -142,8 +131,8 @@ def editar(prof_id):
     professor_info = {
         "id": professor.id,
         "nome": professor.usuario.nome if professor.usuario else "",
-        "email": professor.usuario.email if professor.usuario else "",
-        "telefone": professor.usuario.telefone if professor.usuario else "",
+        "email": professor.email or (professor.usuario.email if professor.usuario else ""),
+        "telefone": professor.telefone or "",
         "materia": professor.materia,
         "turmas": professor.turmas,
         "disciplinas": json.loads(professor.disciplinas) if professor.disciplinas else [],
@@ -166,32 +155,26 @@ def atualizar(prof_id):
         flash("Professor não encontrado.", "danger")
         return redirect(url_for('professores.listar'))
     
-    # Atualiza dados do professor
     professor.materia = request.form.get("materia")
+    professor.telefone = request.form.get("telefone")
+    professor.email = request.form.get("email")  # atualiza email
     
     disciplinas = request.form.get("disciplinas", "")
     turmas_lista = request.form.get("turmas_lista", "")
     
     professor.disciplinas = json.dumps([d.strip() for d in disciplinas.split(",") if d.strip()])
     professor.turmas_lista = json.dumps([t.strip() for t in turmas_lista.split(",") if t.strip()])
-    
-    # Atualiza campos legados (string)
     professor.turmas = turmas_lista
     
-    # Atualiza usuário
     usuario = professor.usuario
     if usuario:
         usuario.nome = request.form.get("nome")
         usuario.email = request.form.get("email")
-        usuario.telefone = request.form.get("telefone")
     
     db.session.commit()
     flash("Professor atualizado com sucesso!", "success")
     return redirect(url_for('professores.listar'))
 
-# =========================
-# EXCLUIR PROFESSOR
-# =========================
 @professores_bp.route("/professores/<int:prof_id>/excluir", methods=["POST"])
 def excluir(prof_id):
     if 'usuario_id' not in session:
@@ -205,12 +188,7 @@ def excluir(prof_id):
         flash("Professor não encontrado.", "danger")
         return redirect(url_for('professores.listar'))
     
-    usuario_id = professor.usuario_id
     db.session.delete(professor)
-    if usuario_id:
-        usuario = Usuario.query.get(usuario_id)
-        if usuario:
-            db.session.delete(usuario)
     db.session.commit()
     
     flash("Professor excluído com sucesso!", "success")

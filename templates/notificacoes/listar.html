@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Notificações - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">🔔 Notificações</h1>
+            <p style="color: #94a3b8;">Suas notificações recentes.</p>
+        </div>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card border-0 shadow" style="background: #1e293b;">
+        <div class="card-body">
+            {% if notificacoes %}
+                <ul class="list-group list-group-flush">
+                    {% for n in notificacoes %}
+                    <li class="list-group-item" style="background: #1e293b; color: #f1f5f9; border-color: #334155;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="mb-1">{{ n.mensagem }}</p>
+                                <small style="color: #64748b;">{{ n.criada_em.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                            {% if n.link %}
+                            <a href="{{ n.link }}" class="btn btn-sm btn-primary">Ver</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color: #94a3b8;">Nenhuma notificação no momento.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

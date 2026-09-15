@@ -5,11 +5,16 @@ from flask_mail import Mail
 import os
 from datetime import timedelta
 
-# Inicializa extensões
+# =========================
+# EXTENSÕES (instanciadas fora do create_app)
+# =========================
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 mail = Mail()
 
+# =========================
+# CRIAR APP
+# =========================
 def create_app():
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
     
@@ -25,10 +30,10 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, 'escola.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # Upload
+    # Upload de arquivos
     app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'uploads')
     
-    # E-mail
+    # E-mail (Flask-Mail)
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
     app.config['MAIL_USE_TLS'] = True
@@ -49,6 +54,8 @@ def create_app():
     from app.routes.biblioteca import biblioteca_bp
     from app.routes.notas import notas_bp
     from app.routes.meu_perfil import meu_perfil_bp
+    from app.routes.notificacoes import notificacoes_bp
+    from app.routes.frequencia import frequencia_bp
     
     app.register_blueprint(auth_bp, url_prefix='/')
     app.register_blueprint(dashboard_bp, url_prefix='/')
@@ -57,6 +64,10 @@ def create_app():
     app.register_blueprint(biblioteca_bp, url_prefix='/')
     app.register_blueprint(notas_bp, url_prefix='/')
     app.register_blueprint(meu_perfil_bp, url_prefix='/')
+    app.register_blueprint(notificacoes_bp, url_prefix='/')
+    app.register_blueprint(frequencia_bp, url_prefix='/')
+
+      # NOVO
     
     # Cria tabelas se não existirem
     with app.app_context():

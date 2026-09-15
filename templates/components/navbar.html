@@ -33,6 +33,19 @@
                 </li>
                 {% endif %}
 
+                <!-- NOTIFICAÇÕES -->
+               <!-- NOTIFICAÇÕES -->
+<li class="nav-item me-3 position-relative">
+    <a class="nav-link position-relative" href="{{ url_for('notificacoes.listar') }}" id="sinoNotificacoes" style="font-size: 1.6rem; padding: 4px 10px;">
+        🔔
+        <span id="contadorNotificacoes"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              style="display: none; font-size: 0.75rem; padding: 4px 7px; font-weight: 700;">
+            0
+        </span>
+    </a>
+</li>
+
                 <li class="nav-item ms-2">
                     <span class="badge {% if session.get('tipo') in ['admin','diretor'] %}badge-admin{% else %}badge-aluno{% endif %}">
                         {{ session.get("tipo", "").upper() }}
@@ -59,3 +72,44 @@
         </div>
     </div>
 </nav>
+
+<!-- SCRIPT DE NOTIFICAÇÕES -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Script de notificações carregado!");
+    
+    function atualizarContador() {
+        fetch('/api/notificacoes/contar')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Contador recebido:", data);
+                const badge = document.getElementById('contadorNotificacoes');
+                const sino = document.getElementById('sinoNotificacoes');
+                
+                if (data.total > 0) {
+                    badge.textContent = data.total;
+                    badge.style.display = 'inline-block';
+                    sino.classList.add('ativo');
+                } else {
+                    badge.style.display = 'none';
+                    sino.classList.remove('ativo');
+                }
+            })
+            .catch(error => console.error("Erro ao buscar notificações:", error));
+    }
+    
+    atualizarContador();
+    setInterval(atualizarContador, 30000);
+});
+</script>
+
+<style>
+@keyframes pulsar {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+#sinoNotificacoes.ativo {
+    animation: pulsar 1s infinite;
+}
+</style>

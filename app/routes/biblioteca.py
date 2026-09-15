@@ -1,13 +1,17 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from app import db
 from app.models.livro import Livro
 from app.models.aluno import Aluno
 from app.models.usuario import Usuario
+from app.models.notificacao import Notificacao
 from datetime import datetime, timedelta
 import json
 
 biblioteca_bp = Blueprint('biblioteca', __name__)
 
+# =========================
+# PERMISSÕES (funções que serão chamadas DENTRO das rotas)
+# =========================
 def is_admin():
     return session.get("tipo") in ["admin", "diretor"]
 
@@ -22,6 +26,9 @@ def formatar_data_br(data):
         return "-"
     return data.strftime("%d/%m/%Y")
 
+# =========================
+# LISTAR LIVROS
+# =========================
 @biblioteca_bp.route("/biblioteca")
 def listar():
     if 'usuario_id' not in session:
@@ -47,7 +54,7 @@ def listar():
         if aluno and aluno.usuario:
             nome_aluno_logado = aluno.usuario.nome
     
-    # Verifica se o ALUNO LOGADO já tem um livro emprestado (usando nome normalizado)
+    # Verifica se o aluno logado já tem um livro emprestado
     aluno_tem_livro = False
     if is_aluno():
         usuario_id = session.get('usuario_id')
@@ -65,28 +72,19 @@ def listar():
     for livro in resultado:
         esta_emprestado = livro.emprestado_para is not None
         
-        # 🔥 LÓGICA DE PODE_DEVOLVER (com logs)
         pode_devolver = False
         if esta_emprestado:
             if is_staff():
                 pode_devolver = True
-                print(f"✅ STAFF: pode devolver {livro.titulo}")
             elif is_aluno():
                 usuario_id = session.get('usuario_id')
                 aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
                 if aluno and aluno.usuario:
                     nome_aluno = aluno.usuario.nome.strip().lower()
                     nome_emprestado = livro.emprestado_para.strip().lower()
-                    # 🔥 LOG PARA DEBUG
-                    print(f"🔍 Aluno logado: '{nome_aluno}' | Emprestado para: '{nome_emprestado}' | Livro: {livro.titulo}")
                     if nome_aluno == nome_emprestado:
                         pode_devolver = True
-                        print(f"✅ PODE DEVOLVER: {nome_aluno} == {nome_emprestado}")
-                    else:
-                        pode_devolver = False
-                        print(f"❌ NÃO PODE DEVOLVER: {nome_aluno} != {nome_emprestado}")
         
-        # Pode emprestar se: estoque > 0 e (staff ou (aluno sem livro))
         pode_emprestar = False
         if livro.estoque > 0:
             if is_staff():
@@ -119,6 +117,9 @@ def listar():
         nome_aluno_logado=nome_aluno_logado
     )
 
+# =========================
+# CADASTRAR LIVRO
+# =========================
 @biblioteca_bp.route("/biblioteca/cadastrar")
 def cadastrar_livro():
     if 'usuario_id' not in session:
@@ -181,6 +182,9 @@ def salvar_livro():
     flash(f"Livro cadastrado com sucesso! {quantidade} exemplar(es) em estoque. Prazo: {prazo_devolucao} dias.", "success")
     return redirect(url_for('biblioteca.listar'))
 
+# =========================
+# EMPRESTAR LIVRO
+# =========================
 @biblioteca_bp.route("/biblioteca/emprestar", methods=["POST"])
 def emprestar_livro():
     if 'usuario_id' not in session:
@@ -243,8 +247,22 @@ def emprestar_livro():
     
     data_br = livro.data_devolucao.strftime("%d/%m/%Y")
     flash(f"Empréstimo realizado! {livro.titulo} - Devolver até: {data_br}.", "success")
+    
+    # 🔔 NOTIFICAÇÃO para o aluno
+    if is_aluno():
+        notif = Notificacao(
+            usuario_id=session.get('usuario_id'),
+            mensagem=f"Você emprestou o livro '{livro.titulo}'. Devolva até {data_br}.",
+            link=url_for('biblioteca.listar')
+        )
+        db.session.add(notif)
+        db.session.commit()
+    
     return redirect(url_for('biblioteca.listar'))
 
+# =========================
+# DEVOLVER LIVRO
+# =========================
 @biblioteca_bp.route("/biblioteca/<int:livro_id>/devolver", methods=["POST"])
 def devolver_livro(livro_id):
     if 'usuario_id' not in session:
@@ -259,24 +277,17 @@ def devolver_livro(livro_id):
         flash("Este livro não está emprestado.", "warning")
         return redirect(url_for('biblioteca.listar'))
     
-    # 🔥 LÓGICA DE DEVOLUÇÃO (com logs)
     pode_devolver = False
     if is_staff():
         pode_devolver = True
-        print(f"✅ STAFF: devolvendo {livro.titulo}")
     elif is_aluno():
         usuario_id = session.get('usuario_id')
         aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
         if aluno and aluno.usuario:
             nome_aluno = aluno.usuario.nome.strip().lower()
             nome_emprestado = livro.emprestado_para.strip().lower()
-            print(f"🔍 Aluno logado: '{nome_aluno}' | Emprestado para: '{nome_emprestado}' | Livro: {livro.titulo}")
             if nome_aluno == nome_emprestado:
                 pode_devolver = True
-                print(f"✅ PODE DEVOLVER: {nome_aluno} == {nome_emprestado}")
-            else:
-                pode_devolver = False
-                print(f"❌ NÃO PODE DEVOLVER: {nome_aluno} != {nome_emprestado}")
     
     if pode_devolver:
         livro.estoque += 1
@@ -290,6 +301,9 @@ def devolver_livro(livro_id):
     
     return redirect(url_for('biblioteca.listar'))
 
+# =========================
+# EXCLUIR LIVRO
+# =========================
 @biblioteca_bp.route("/biblioteca/<int:livro_id>/excluir", methods=["POST"])
 def excluir_livro(livro_id):
     if 'usuario_id' not in session:
@@ -307,3 +321,27 @@ def excluir_livro(livro_id):
     db.session.commit()
     flash("Livro excluído com sucesso.", "success")
     return redirect(url_for('biblioteca.listar'))
+
+# =========================
+# API - TOP 5 LIVROS MAIS EMPRESTADOS
+# =========================
+@biblioteca_bp.route("/api/livros_emprestados")
+def api_livros_emprestados():
+    if 'usuario_id' not in session:
+        return jsonify({"error": "Não autorizado"}), 401
+    
+    livros = Livro.query.all()
+    dados = []
+    for livro in livros:
+        emprestados = livro.quantidade - livro.estoque
+        if emprestados > 0:
+            dados.append({
+                "label": livro.titulo,
+                "value": emprestados
+            })
+    
+    dados = sorted(dados, key=lambda x: x["value"], reverse=True)[:5]
+    if not dados:
+        dados.append({"label": "Nenhum livro emprestado", "value": 1})
+    
+    return jsonify({"dados": dados})

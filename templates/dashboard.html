@@ -53,17 +53,30 @@
             </div>
         </div>
 
+        <!-- Frequência -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">📋</span>
+                    <div class="fw-bold" style="font-size: 2rem; color: #F87171;">Frequência</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Presenças</div>
+                </div>
+                <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-danger mt-3 w-100">📋 Fazer Chamada</a>
+                <a href="{{ url_for('frequencia.relatorio') }}" class="btn btn-outline-secondary mt-2 w-100">📊 Relatório</a>
+            </div>
+        </div>
+
     </div>
 
     <!-- ========================================= -->
-    <!-- PROFESSOR (VÊ ALUNOS, BIBLIOTECA, LANÇAR NOTA) -->
+    <!-- PROFESSOR -->
     <!-- ========================================= -->
     {% elif tipo == 'professor' %}
 
     <div class="row g-4">
 
-        <!-- Alunos (filtrados pelas turmas dele) -->
-        <div class="col-md-4">
+        <!-- Alunos -->
+        <div class="col-md-3">
             <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
                 <div class="d-flex flex-column align-items-center justify-content-center">
                     <span style="font-size: 3rem;">👨‍🎓</span>
@@ -75,7 +88,7 @@
         </div>
 
         <!-- Biblioteca -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
                 <div class="d-flex flex-column align-items-center justify-content-center">
                     <span style="font-size: 3rem;">📚</span>
@@ -87,7 +100,7 @@
         </div>
 
         <!-- Lançar Nota -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
                 <div class="d-flex flex-column align-items-center justify-content-center">
                     <span style="font-size: 3rem;">📝</span>
@@ -95,6 +108,19 @@
                     <div class="text-secondary" style="color: #94a3b8;">Notas</div>
                 </div>
                 <a href="{{ url_for('notas.lancar_nota') }}" class="btn btn-primary mt-3 w-100">📝 Lançar Nota</a>
+            </div>
+        </div>
+
+        <!-- Frequência -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">📋</span>
+                    <div class="fw-bold" style="font-size: 2rem; color: #F87171;">Frequência</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Presenças</div>
+                </div>
+                <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-danger mt-3 w-100">📋 Fazer Chamada</a>
+                <a href="{{ url_for('frequencia.relatorio') }}" class="btn btn-outline-secondary mt-2 w-100">📊 Relatório</a>
             </div>
         </div>
 
@@ -108,7 +134,7 @@
     <div class="row g-4">
 
         <!-- Biblioteca -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
                 <div class="d-flex flex-column align-items-center justify-content-center">
                     <span style="font-size: 3rem;">📚</span>
@@ -120,7 +146,7 @@
         </div>
 
         <!-- Meu Perfil -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
                 <div class="d-flex flex-column align-items-center justify-content-center">
                     <span style="font-size: 3rem;">👤</span>
@@ -132,7 +158,7 @@
         </div>
 
         <!-- Boletim -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
                 <div class="d-flex flex-column align-items-center justify-content-center">
                     <span style="font-size: 3rem;">📊</span>
@@ -144,6 +170,18 @@
                 {% else %}
                     <button class="btn btn-secondary mt-3 w-100" disabled>Perfil incompleto</button>
                 {% endif %}
+            </div>
+        </div>
+
+        <!-- Frequência -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <span style="font-size: 3rem;">📋</span>
+                    <div class="fw-bold" style="font-size: 2.5rem; color: #F87171;">Frequência</div>
+                    <div class="text-secondary" style="color: #94a3b8;">Suas presenças</div>
+                </div>
+                <a href="{{ url_for('frequencia.minha_frequencia') }}" class="btn btn-primary mt-3 w-100">Ver Minha Frequência</a>
             </div>
         </div>
 

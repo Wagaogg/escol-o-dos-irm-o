@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Minha Frequência - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">📋 Minha Frequência</h1>
+            <p style="color: #94a3b8;">{{ aluno.usuario.nome if aluno.usuario else '' }} - Turma {{ aluno.turma or '-' }}</p>
+        </div>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <!-- Resumo por disciplina -->
+    <div class="row g-4 mb-4">
+        {% for d, stats in disciplinas.items() %}
+        <div class="col-md-4">
+            <div class="card border-0 shadow p-3" style="background: #1e293b;">
+                <h5 style="color: #facc15;">{{ d }}</h5>
+                <div class="d-flex justify-content-between">
+                    <span style="color: #34D399;">✅ {{ stats.presente }}</span>
+                    <span style="color: #F87171;">❌ {{ stats.falta }}</span>
+                    <span style="color: #FBBF24;">📝 {{ stats.justificada }}</span>
+                </div>
+                <hr style="border-color: #334155;">
+                <div class="text-center">
+                    <span class="fw-bold" style="color: #60A5FA; font-size: 1.3rem;">{{ stats.percentual }}%</span>
+                    <br>
+                    <small style="color: #94a3b8;">Presença</small>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <p style="color: #94a3b8;">Nenhuma frequência registrada ainda.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Histórico -->
+    {% if frequencias %}
+    <div class="card border-0 shadow" style="background: #1e293b;">
+        <div class="card-body">
+            <h5 style="color: #f1f5f9;">Histórico</h5>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="color: #94a3b8;">Data</th>
+                        <th style="color: #94a3b8;">Disciplina</th>
+                        <th style="color: #94a3b8;">Status</th>
+                        <th style="color: #94a3b8;">Observação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in frequencias %}
+                    <tr>
+                        <td style="color: #f1f5f9;">{{ f.data.strftime('%d/%m/%Y') }}</td>
+                        <td style="color: #f1f5f9;">{{ f.disciplina }}</td>
+                        <td>
+                            {% if f.status == 'presente' %}
+                                <span class="badge bg-success">Presente</span>
+                            {% elif f.status == 'falta' %}
+                                <span class="badge bg-danger">Falta</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Justificada</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: #94a3b8;">{{ f.observacao or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

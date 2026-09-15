@@ -2,12 +2,11 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from app import db
 from app.models.aluno import Aluno
 from app.models.professor import Professor
+from app.models.usuario import Usuario
+from app.models.notificacao import Notificacao
 from datetime import datetime
 import json
 
-# =========================
-# BLUEPRINT
-# =========================
 notas_bp = Blueprint('notas', __name__)
 
 # =========================
@@ -64,16 +63,13 @@ def lancar_nota():
             flash("Aluno não encontrado.", "danger")
             return redirect(url_for('notas.lancar_nota'))
         
-        # Carrega notas do JSON
         notas = json.loads(aluno.notas) if aluno.notas else []
         
-        # Verifica duplicata
         for n in notas:
             if n.get("disciplina", "").lower() == disciplina.lower() and n.get("bimestre") == bimestre:
                 flash(f"Já existe nota para {disciplina} no {bimestre}º bimestre.", "warning")
                 return redirect(url_for('notas.lancar_nota'))
         
-        # Adiciona nova nota
         notas.append({
             "disciplina": disciplina,
             "bimestre": bimestre,
@@ -84,6 +80,18 @@ def lancar_nota():
         db.session.commit()
         
         flash(f"Nota {nota} lançada para {aluno.usuario.nome} em {disciplina} ({bimestre}º bimestre).", "success")
+        
+        # 🔔 NOTIFICAÇÃO para o aluno
+        aluno_usuario = Usuario.query.get(aluno.usuario_id)
+        if aluno_usuario:
+            notif = Notificacao(
+                usuario_id=aluno_usuario.id,
+                mensagem=f"Nota lançada em {disciplina} ({bimestre}º bimestre): {nota}",
+                link=url_for('notas.boletim', aluno_id=aluno.id)
+            )
+            db.session.add(notif)
+            db.session.commit()
+        
         return redirect(url_for('notas.lancar_nota'))
     
     # GET - exibe o formulário
@@ -114,7 +122,6 @@ def boletim(aluno_id):
         flash("Aluno não encontrado.", "danger")
         return redirect(url_for('dashboard.index'))
     
-    # Permissões
     if is_aluno():
         usuario_id = session.get('usuario_id')
         aluno_logado = Aluno.query.filter_by(usuario_id=usuario_id).first()
@@ -125,10 +132,8 @@ def boletim(aluno_id):
         flash("Acesso negado.", "danger")
         return redirect(url_for('dashboard.index'))
     
-    # Carrega notas do JSON
     notas = json.loads(aluno.notas) if aluno.notas else []
     
-    # Organiza notas por disciplina e bimestre
     disciplinas = sorted(set(n["disciplina"] for n in notas))
     dados_notas = {}
     for d in disciplinas:
@@ -139,7 +144,6 @@ def boletim(aluno_id):
                 if 1 <= bim <= 4:
                     dados_notas[d][bim] = n["nota"]
     
-    # Calcula médias das disciplinas
     medias_disciplinas = {}
     for d in disciplinas:
         notas_d = [n["nota"] for n in notas if n["disciplina"] == d]
@@ -148,7 +152,6 @@ def boletim(aluno_id):
         else:
             medias_disciplinas[d] = None
     
-    # Média geral (apenas disciplinas completas)
     medias_validas = [m for m in medias_disciplinas.values() if m is not None]
     media_geral = round(sum(medias_validas) / len(medias_validas), 2) if medias_validas else None
     
@@ -156,7 +159,6 @@ def boletim(aluno_id):
     if media_geral is not None:
         situacao = "Aprovado" if media_geral >= 6 else "Reprovado"
     
-    # Dados do aluno para o template
     aluno_info = {
         "id": aluno.id,
         "nome": aluno.usuario.nome if aluno.usuario else "Sem nome",

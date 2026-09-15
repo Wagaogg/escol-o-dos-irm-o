@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from app import db
 from app.models.usuario import Usuario
 from app.models.aluno import Aluno
+from app.models.professor import Professor
 from functools import wraps
 
 auth_bp = Blueprint('auth', __name__)
@@ -40,22 +41,32 @@ def autenticar():
     email = request.form.get("email")
     senha = request.form.get("senha")
     
-    # Busca usuário no SQLite
     usuario = Usuario.query.filter_by(email=email).first()
     
     if usuario and usuario.verificar_senha(senha):
+        # 🔥 Verifica se é professor
+        prof = Professor.query.filter_by(usuario_id=usuario.id).first()
+        
+        if prof:
+            if usuario.tipo != "professor":
+                usuario.tipo = "professor"
+                db.session.commit()
+            session['tipo'] = "professor"
+        else:
+            session['tipo'] = usuario.tipo
+        
         session.permanent = True
         session['usuario_id'] = usuario.id
         session['usuario'] = usuario.nome
         session['email'] = usuario.email
-        session['tipo'] = usuario.tipo
+        
         return redirect(url_for('dashboard.index'))
     
     flash("Email ou senha inválidos.", "danger")
     return redirect(url_for('auth.login', erro=1))
 
 # =========================
-# CADASTRO DE USUÁRIO (público - todos viram aluno)
+# CADASTRO DE USUÁRIO
 # =========================
 @auth_bp.route("/cadastro")
 def cadastro():
@@ -66,25 +77,38 @@ def criar_conta():
     nome = request.form.get("nome")
     email = request.form.get("email")
     senha = request.form.get("senha")
-    tipo = "aluno"
     
-    # Verifica se o email já existe
+    # Verifica se o email já está em uso
     usuario_existente = Usuario.query.filter_by(email=email).first()
     if usuario_existente:
         flash("Este email já está em uso.", "danger")
         return render_template("auth/cadastro.html", erro=1)
     
-    # Cria usuário no SQLite
-    novo_usuario = Usuario(
-        nome=nome,
-        email=email,
-        tipo=tipo
-    )
-    novo_usuario.senha_criptografada = senha  # criptografa a senha
-    db.session.add(novo_usuario)
-    db.session.flush()  # para pegar o ID
+    # 🔥 VERIFICA SE O EMAIL JÁ ESTÁ CADASTRADO COMO PROFESSOR
+    professor_existente = Professor.query.filter(
+        db.func.lower(Professor.email) == email.lower()
+    ).first()
     
-    # Cria aluno automaticamente no SQLite
+    if professor_existente:
+        # Já é professor cadastrado → cria como professor
+        novo_usuario = Usuario(nome=nome, email=email, tipo="professor")
+        novo_usuario.senha_criptografada = senha
+        db.session.add(novo_usuario)
+        db.session.flush()
+        
+        # Vincula o professor ao usuário
+        professor_existente.usuario_id = novo_usuario.id
+        db.session.commit()
+        
+        flash("Conta de professor criada com sucesso! Faça login.", "success")
+        return redirect(url_for('auth.login'))
+    
+    # Se não for professor, cria como aluno
+    novo_usuario = Usuario(nome=nome, email=email, tipo="aluno")
+    novo_usuario.senha_criptografada = senha
+    db.session.add(novo_usuario)
+    db.session.flush()
+    
     novo_aluno = Aluno(
         usuario_id=novo_usuario.id,
         matricula=f"MAT{novo_usuario.id:04d}",
