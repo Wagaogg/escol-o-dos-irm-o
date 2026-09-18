@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Frequência - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="mb-4">
+        <h1 class="fw-bold" style="color: #f1f5f9;">📋 Frequência</h1>
+        <p style="color: #94a3b8;">Gerencie a presença dos alunos.</p>
+    </div>
+
+    <!-- Cards de estatísticas -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow p-4 text-center" style="background: #1e293b;">
+                <div style="font-size: 2.5rem;">📊</div>
+                <div class="fw-bold" style="font-size: 2rem; color: #60A5FA;">{{ total_registros }}</div>
+                <div class="text-secondary" style="color: #94a3b8;">Total de registros</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow p-4 text-center" style="background: #1e293b;">
+                <div style="font-size: 2.5rem;">✅</div>
+                <div class="fw-bold" style="font-size: 2rem; color: #34D399;">{{ total_presentes }}</div>
+                <div class="text-secondary" style="color: #94a3b8;">Presenças</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow p-4 text-center" style="background: #1e293b;">
+                <div style="font-size: 2.5rem;">❌</div>
+                <div class="fw-bold" style="font-size: 2rem; color: #F87171;">{{ total_faltas }}</div>
+                <div class="text-secondary" style="color: #94a3b8;">Faltas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow p-4 text-center" style="background: #1e293b;">
+                <div style="font-size: 2.5rem;">📝</div>
+                <div class="fw-bold" style="font-size: 2rem; color: #FBBF24;">{{ total_justificadas }}</div>
+                <div class="text-secondary" style="color: #94a3b8;">Justificadas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div style="font-size: 3rem;">📋</div>
+                <h4 class="fw-bold mt-3" style="color: #f1f5f9;">Fazer Chamada</h4>
+                <p style="color: #94a3b8;">Registre a presença de uma turma.</p>
+                <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-primary mt-2">Iniciar Chamada</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow h-100 p-4 text-center" style="background: #1e293b;">
+                <div style="font-size: 3rem;">📊</div>
+                <h4 class="fw-bold mt-3" style="color: #f1f5f9;">Relatório</h4>
+                <p style="color: #94a3b8;">Veja a frequência dos alunos.</p>
+                <a href="{{ url_for('frequencia.relatorio') }}" class="btn btn-outline-secondary mt-2">Ver Relatório</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

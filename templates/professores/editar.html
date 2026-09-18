@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Editar Professor - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">✏️ Editar Professor</h1>
+            <p style="color: #94a3b8;">Editando: {{ prof.nome }}</p>
+        </div>
+        <a href="{{ url_for('professores.listar') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card shadow border-0" style="background: #1e293b;">
+        <div class="card-body p-4">
+            <form action="{{ url_for('professores.atualizar', prof_id=prof.id) }}" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Nome *</label>
+                        <input type="text" name="nome" class="form-control" value="{{ prof.nome }}" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ prof.email or '' }}" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Telefone</label>
+                        <input type="text" name="telefone" class="form-control" value="{{ prof.telefone or '' }}" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Matéria</label>
+                        <input type="text" name="materia" class="form-control" value="{{ prof.materia or '' }}" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Disciplinas</label>
+                        <input type="text" name="disciplinas" class="form-control" value="{{ prof.disciplinas|join(', ') }}" placeholder="Separe por vírgula" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Turmas</label>
+                        <input type="text" name="turmas_lista" class="form-control" value="{{ prof.turmas_lista|join(', ') }}" placeholder="Separe por vírgula" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-warning">💾 Salvar Alterações</button>
+                    <a href="{{ url_for('professores.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

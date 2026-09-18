@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block title %}Chamada: {{ turma }} - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">📋 Chamada: {{ turma }}</h1>
+            <p style="color: #94a3b8;">{{ disciplina }} - {{ data_br }}</p>
+        </div>
+        <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow p-3 text-center" style="background: #1e293b;">
+                <div class="fw-bold" style="font-size: 1.8rem; color: #60A5FA;">{{ total_alunos }}</div>
+                <div style="color: #94a3b8;">Total</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow p-3 text-center" style="background: #1e293b;">
+                <div class="fw-bold" style="font-size: 1.8rem; color: #34D399;" id="countPresente">{{ total_presentes }}</div>
+                <div style="color: #94a3b8;">Presentes</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow p-3 text-center" style="background: #1e293b;">
+                <div class="fw-bold" style="font-size: 1.8rem; color: #F87171;" id="countFalta">{{ total_faltas }}</div>
+                <div style="color: #94a3b8;">Faltas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow p-3 text-center" style="background: #1e293b;">
+                <div class="fw-bold" style="font-size: 1.8rem; color: #FBBF24;" id="countJustificada">{{ total_justificadas }}</div>
+                <div style="color: #94a3b8;">Justificadas</div>
+            </div>
+        </div>
+    </div>
+
+    {% if alunos %}
+    <form method="POST" action="{{ url_for('frequencia.salvar') }}">
+        <input type="hidden" name="turma" value="{{ turma }}">
+        <input type="hidden" name="disciplina" value="{{ disciplina }}">
+        <input type="hidden" name="data" value="{{ data }}">
+
+        <div class="card border-0 shadow" style="background: #1e293b;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <button type="button" class="btn btn-sm btn-success" onclick="marcarTodos('presente')">
+                            ✅ Todos Presentes
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="marcarTodos('falta')">
+                            ❌ Todos Faltaram
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th style="color: #94a3b8; width: 40px;">#</th>
+                                <th style="color: #94a3b8;">Aluno</th>
+                                <th style="color: #94a3b8; width: 320px;">Status</th>
+                                <th style="color: #94a3b8;">Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in alunos %}
+                            <tr>
+                                <td style="color: #94a3b8;">{{ loop.index }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if a.foto %}
+                                        <img src="{{ url_for('static', filename=a.foto) }}" style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;">
+                                        {% else %}
+                                        <span style="font-size: 1.5rem;">👤</span>
+                                        {% endif %}
+                                        <div>
+                                            <div style="color: #f1f5f9; font-weight: 500;">{{ a.nome }}</div>
+                                            <small style="color: #64748b;">{{ a.matricula }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check status-radio" name="status_{{ a.id }}" id="p_{{ a.id }}" value="presente" data-status="presente" {% if a.status_atual == 'presente' %}checked{% endif %}>
+                                        <label class="btn btn-outline-success btn-sm" for="p_{{ a.id }}">✅ Presente</label>
+
+                                        <input type="radio" class="btn-check status-radio" name="status_{{ a.id }}" id="f_{{ a.id }}" value="falta" data-status="falta" {% if a.status_atual == 'falta' %}checked{% endif %}>
+                                        <label class="btn btn-outline-danger btn-sm" for="f_{{ a.id }}">❌ Falta</label>
+
+                                        <input type="radio" class="btn-check status-radio" name="status_{{ a.id }}" id="j_{{ a.id }}" value="justificada" data-status="justificada" {% if a.status_atual == 'justificada' %}checked{% endif %}>
+                                        <label class="btn btn-outline-warning btn-sm" for="j_{{ a.id }}">📝 Justificada</label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="text" name="obs_{{ a.id }}" class="form-control form-control-sm" value="{{ a.observacao_atual }}" placeholder="Opcional" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">💾 Salvar Chamada</button>
+                    <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </div>
+        </div>
+    </form>
+    {% else %}
+    <div class="card border-0 shadow p-5 text-center" style="background: #1e293b;">
+        <div style="font-size: 3rem;">😕</div>
+        <h4 class="mt-3" style="color: #f1f5f9;">Nenhum aluno encontrado nessa turma</h4>
+        <p style="color: #94a3b8;">Verifique se há alunos cadastrados com a turma "{{ turma }}".</p>
+        <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-primary mt-3">← Voltar</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function marcarTodos(status) {
+    document.querySelectorAll(`input[type="radio"][value="${status}"]`).forEach(r => r.checked = true);
+    atualizarContadores();
+}
+
+function atualizarContadores() {
+    const presentes = document.querySelectorAll('input[value="presente"]:checked').length;
+    const faltas = document.querySelectorAll('input[value="falta"]:checked').length;
+    const justificadas = document.querySelectorAll('input[value="justificada"]:checked').length;
+    
+    document.getElementById('countPresente').textContent = presentes;
+    document.getElementById('countFalta').textContent = faltas;
+    document.getElementById('countJustificada').textContent = justificadas;
+}
+
+document.querySelectorAll('.status-radio').forEach(r => {
+    r.addEventListener('change', atualizarContadores);
+});
+</script>
+
+<style>
+    .table {
+        --bs-table-bg: transparent;
+        --bs-table-color: #f1f5f9;
+        --bs-table-border-color: #334155;
+        --bs-table-hover-bg: rgba(96, 165, 250, 0.05);
+        --bs-table-hover-color: #f1f5f9;
+    }
+    .table thead th {
+        background: #0f172a !important;
+        color: #94a3b8 !important;
+        border-color: #334155 !important;
+    }
+    .table tbody td {
+        background: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: #334155 !important;
+    }
+    .table tbody tr:hover td {
+        background: #273449 !important;
+    }
+    .btn-check:checked + .btn-outline-success {
+        background-color: #198754 !important;
+        color: white !important;
+        border-color: #198754 !important;
+    }
+    .btn-check:checked + .btn-outline-danger {
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-color: #dc3545 !important;
+    }
+    .btn-check:checked + .btn-outline-warning {
+        background-color: #ffc107 !important;
+        color: black !important;
+        border-color: #ffc107 !important;
+    }
+    .btn-outline-success { color: #34D399 !important; border-color: #34D399 !important; }
+    .btn-outline-danger { color: #F87171 !important; border-color: #F87171 !important; }
+    .btn-outline-warning { color: #FBBF24 !important; border-color: #FBBF24 !important; }
+</style>
+
+{% endblock %}

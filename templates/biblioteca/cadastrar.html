@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Cadastrar Livro - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">📖 Cadastrar Livro</h1>
+            <p style="color: #94a3b8;">Adicione um novo livro ao acervo da biblioteca.</p>
+        </div>
+        <!-- CORRIGIDO: biblioteca → biblioteca.listar -->
+        <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card shadow border-0" style="background: #1e293b;">
+        <div class="card-body p-4">
+
+            <!-- CORRIGIDO: salvar_livro → biblioteca.salvar_livro -->
+            <form action="{{ url_for('biblioteca.salvar_livro') }}" method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-md-8">
+                        <label class="form-label" style="color: #f1f5f9;">Título *</label>
+                        <input type="text" name="titulo" class="form-control" placeholder="Título do livro" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" style="color: #f1f5f9;">Ano de Publicação *</label>
+                        <input type="number" name="ano" class="form-control" placeholder="Ex: 2020" required min="1000" max="9999" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                        <small class="text-secondary">Apenas números (ex: 2024)</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Autor *</label>
+                        <input type="text" name="autor" class="form-control" placeholder="Nome do autor" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Editora</label>
+                        <input type="text" name="editora" class="form-control" placeholder="Nome da editora" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Gênero</label>
+                        <select name="genero" class="form-control" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                            <option value="">Selecione...</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Ficção Científica">Ficção Científica</option>
+                            <option value="Fantasia">Fantasia</option>
+                            <option value="Terror">Terror</option>
+                            <option value="Biografia">Biografia</option>
+                            <option value="História">História</option>
+                            <option value="Filosofia">Filosofia</option>
+                            <option value="Ciências">Ciências</option>
+                            <option value="Didático">Didático</option>
+                            <option value="Poesia">Poesia</option>
+                            <option value="Conto">Conto</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Quantidade em Estoque *</label>
+                        <input type="number" name="quantidade" class="form-control" placeholder="Ex: 5" min="1" value="1" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                        <small class="text-secondary">Número de exemplares disponíveis para empréstimo.</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Prazo de Devolução (dias) *</label>
+                        <input type="number" name="prazo_devolucao" class="form-control" placeholder="Ex: 7" min="1" max="365" value="7" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                        <small class="text-secondary">Número de dias para devolução após o empréstimo.</small>
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">✅ Cadastrar Livro</button>
+                    <!-- CORRIGIDO: biblioteca → biblioteca.listar -->
+                    <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const ano = document.querySelector('input[name="ano"]').value.trim();
+    if (ano && !/^\d{4}$/.test(ano)) {
+        alert('O ano deve ter 4 dígitos (ex: 2024).');
+        e.preventDefault();
+    }
+});
+</script>
+
+{% endblock %}

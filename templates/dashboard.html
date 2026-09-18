@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Início - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="mb-5">
+        <h1>Início</h1>
+        <p class="text-secondary mb-0">Bem-vindo, <strong style="color: var(--text);">{{ usuario }}</strong>.</p>
+    </div>
+
+    <!-- ========================================= -->
+    <!-- ADMIN / DIRETOR / PROFESSOR -->
+    <!-- ========================================= -->
+    {% if tipo in ['admin', 'diretor', 'professor'] %}
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Alunos</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #60A5FA; line-height: 1;">{{ total_alunos }}</div>
+                    <a href="{{ url_for('alunos.listar') }}" class="btn btn-primary w-100 mt-4">Ver Alunos</a>
+                </div>
+            </div>
+        </div>
+
+        {% if tipo in ['admin', 'diretor'] %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Professores</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #34D399; line-height: 1;">{{ total_professores }}</div>
+                    <a href="{{ url_for('professores.listar') }}" class="btn btn-success w-100 mt-4">Ver Professores</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Biblioteca</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #FBBF24; line-height: 1;">{{ disponiveis }}</div>
+                    <div class="text-secondary" style="font-size: 0.8rem;">livros disponíveis</div>
+                    <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning w-100 mt-4">Ver Biblioteca</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Frequência</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #F87171; line-height: 1;">📋</div>
+                    <div class="text-secondary" style="font-size: 0.8rem;">controle de presença</div>
+                    <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-danger w-100 mt-4">Fazer Chamada</a>
+                </div>
+            </div>
+        </div>
+
+        {% if tipo == 'professor' %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Notas</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #A78BFA; line-height: 1;">📝</div>
+                    <div class="text-secondary" style="font-size: 0.8rem;">lançamento de notas</div>
+                    <a href="{{ url_for('notas.lancar_nota') }}" class="btn btn-primary w-100 mt-4">Lançar Nota</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ========================================= -->
+    <!-- ALUNO -->
+    <!-- ========================================= -->
+    {% elif tipo == 'aluno' %}
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Biblioteca</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #FBBF24; line-height: 1;">{{ disponiveis }}</div>
+                    <div class="text-secondary" style="font-size: 0.8rem;">livros disponíveis</div>
+                    <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning w-100 mt-4">Ver Biblioteca</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Meu Perfil</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #60A5FA; line-height: 1;">👤</div>
+                    <div class="text-secondary" style="font-size: 0.8rem;">informações pessoais</div>
+                    <a href="{{ url_for('meu_perfil.meu_perfil') }}" class="btn btn-primary w-100 mt-4">Ver Perfil</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Boletim</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #34D399; line-height: 1;">📊</div>
+                    <div class="text-secondary" style="font-size: 0.8rem;">notas e frequência</div>
+                    {% if aluno_logado %}
+                    <a href="{{ url_for('notas.boletim', aluno_id=aluno_logado.id) }}" class="btn btn-success w-100 mt-4">Ver Boletim</a>
+                    {% else %}
+                    <button class="btn btn-secondary w-100 mt-4" disabled>Perfil incompleto</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-secondary" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 12px;">Frequência</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #F87171; line-height: 1;">📋</div>
+                    <div class="text-secondary" style="font-size: 0.8rem;">histórico de presença</div>
+                    <a href="{{ url_for('frequencia.minha_frequencia') }}" class="btn btn-danger w-100 mt-4">Ver Frequência</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning">Tipo de usuário não reconhecido.</div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

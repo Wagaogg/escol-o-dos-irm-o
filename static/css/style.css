@@ -1,0 +1,349 @@
+/* ==============================
+   SEApp — ESTILO PROFISSIONAL
+============================== */
+
+:root {
+    --bg: #0B1120;
+    --surface: #111827;
+    --surface-2: #1F2937;
+    --border: #1F2937;
+    --border-strong: #374151;
+    --text: #E5E7EB;
+    --text-muted: #9CA3AF;
+    --text-dim: #6B7280;
+    --primary: #3B82F6;
+    --primary-hover: #2563EB;
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+}
+
+main {
+    flex: 1;
+    padding: 32px 0;
+}
+
+/* ==============================
+   TIPOGRAFIA
+============================== */
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.2rem; }
+h4 { font-size: 1.05rem; }
+
+p { color: var(--text-muted); }
+
+a {
+    text-decoration: none;
+    color: var(--primary);
+    transition: color 0.15s;
+}
+a:hover { color: #60A5FA; }
+
+/* ==============================
+   NAVBAR
+============================== */
+
+.navbar {
+    background: var(--surface) !important;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    box-shadow: var(--shadow);
+}
+
+.navbar-brand {
+    color: var(--text) !important;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.navbar .nav-link {
+    color: var(--text-muted) !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 6px 14px !important;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s, color 0.15s;
+}
+
+.navbar .nav-link:hover {
+    color: var(--text) !important;
+    background: var(--surface-2);
+}
+
+.badge-admin, .badge-aluno {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+.badge-admin { background: #7C3AED; color: white; }
+.badge-aluno { background: #0369A1; color: white; }
+
+/* ==============================
+   CARDS
+============================== */
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s;
+}
+
+.card:hover {
+    border-color: var(--border-strong) !important;
+}
+
+.card-body {
+    padding: 24px;
+}
+
+/* ==============================
+   FORMULÁRIOS
+============================== */
+
+.form-label {
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.form-control, .form-select {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 9px 12px !important;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-control::placeholder { color: var(--text-dim) !important; }
+
+.form-control:focus, .form-select:focus {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* ==============================
+   BOTÕES
+============================== */
+
+.btn {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+.btn-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-success {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+.btn-success:hover { background: #059669; }
+
+.btn-danger {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+}
+.btn-danger:hover { background: #DC2626; }
+
+.btn-warning {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: #111827;
+}
+.btn-warning:hover { background: #D97706; color: white; }
+
+.btn-secondary {
+    background: var(--surface-2);
+    border-color: var(--border-strong);
+    color: var(--text);
+}
+.btn-secondary:hover {
+    background: var(--border-strong);
+    color: var(--text);
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    border-color: var(--border-strong);
+    color: var(--text-muted);
+}
+.btn-outline-secondary:hover {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border-strong);
+}
+
+/* ==============================
+   TABELAS
+============================== */
+
+.table {
+    color: var(--text) !important;
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--border);
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background: var(--surface-2) !important;
+    color: var(--text-muted) !important;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-color: var(--border) !important;
+    padding: 12px 16px;
+}
+
+.table tbody td {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.table tbody tr:hover td {
+    background: var(--surface-2) !important;
+}
+
+/* ==============================
+   BADGES / STATUS
+============================== */
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+
+/* ==============================
+   FOOTER
+============================== */
+
+footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    text-align: center;
+    padding: 20px;
+    font-size: 0.8rem;
+    margin-top: auto;
+}
+
+/* ==============================
+   ALERTAS
+============================== */
+
+.alert {
+    border-radius: var(--radius-sm);
+    border: 1px solid;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+}
+
+.alert-success { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #34D399; }
+.alert-danger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #F87171; }
+.alert-warning { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: #FBBF24; }
+.alert-info { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: #60A5FA; }
+
+/* ==============================
+   UTILITÁRIOS
+============================== */
+
+.text-secondary, .text-muted { color: var(--text-muted) !important; }
+.text-dim { color: var(--text-dim) !important; }
+
+/* ==============================
+   LOGIN
+============================== */
+
+.login-page {
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-lg);
+}
+
+.login-card h1 {
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.login-card .subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-bottom: 28px;
+}

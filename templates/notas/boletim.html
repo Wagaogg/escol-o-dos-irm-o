@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block title %}Boletim - {{ aluno.nome }} - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <!-- Cabeçalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">📊 Boletim Escolar</h1>
+            <p style="color: #94a3b8;">{{ aluno.nome }} - {{ aluno.turma or 'Sem turma' }}</p>
+        </div>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <!-- Card do Aluno -->
+    <div class="card border-0 shadow mb-4" style="background: #1e293b;">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center">
+                    {% if aluno.foto %}
+                    <img src="{{ url_for('static', filename=aluno.foto) }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 3px solid #60A5FA;">
+                    {% else %}
+                    <span style="font-size: 5rem;">👨‍🎓</span>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h3 class="fw-bold" style="color: #f1f5f9;">{{ aluno.nome }}</h3>
+                    <p class="mb-1" style="color: #94a3b8;">
+                        <strong>Matrícula:</strong> {{ aluno.matricula }}
+                    </p>
+                    <p class="mb-1" style="color: #94a3b8;">
+                        <strong>Série:</strong> {{ aluno.serie or '-' }} | <strong>Turma:</strong> {{ aluno.turma or '-' }}
+                    </p>
+                    <p class="mb-0" style="color: #94a3b8;">
+                        <strong>Email:</strong> {{ aluno.email or '-' }}
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    {% if media_geral is not none %}
+                    <div style="color: #facc15; font-size: 2.5rem; font-weight: 800;">{{ media_geral }}</div>
+                    <div style="color: #94a3b8;">Média Geral</div>
+                    {% endif %}
+                    {% if percentual_geral is not none %}
+                    <div class="mt-2">
+                        <span class="badge {% if percentual_geral >= 75 %}bg-success{% elif percentual_geral >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}" style="font-size: 1rem; padding: 8px 16px;">
+                            {{ percentual_geral }}% Presença
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boletim por disciplina -->
+    {% if resultado %}
+    {% for disciplina, info in resultado.items() %}
+    <div class="card border-0 shadow mb-3" style="background: #1e293b;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0" style="color: #facc15;">{{ disciplina }}</h4>
+                <div>
+                    {% if info.situacao == 'Aprovado' %}
+                        <span class="badge bg-success" style="font-size: 0.9rem; padding: 8px 16px;">✅ Aprovado</span>
+                    {% elif info.situacao == 'Reprovado por Falta' %}
+                        <span class="badge bg-warning text-dark" style="font-size: 0.9rem; padding: 8px 16px;">⚠️ Reprovado por Falta</span>
+                    {% elif info.situacao == 'Reprovado' %}
+                        <span class="badge bg-danger" style="font-size: 0.9rem; padding: 8px 16px;">❌ Reprovado</span>
+                    {% else %}
+                        <span class="badge bg-secondary" style="font-size: 0.9rem; padding: 8px 16px;">⏳ Em andamento</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Grid de notas -->
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3" style="background: #0f172a; border-radius: 10px;">
+                        <div class="fw-bold mb-2" style="color: #94a3b8;">📝 Notas por Bimestre</div>
+                        <div class="row text-center">
+                            {% for bim in [1, 2, 3, 4] %}
+                            <div class="col-3">
+                                <div style="color: #94a3b8; font-size: 0.8rem;">{{ bim }}º Bim</div>
+                                <div style="color: #f1f5f9; font-weight: 700; font-size: 1.3rem;">
+                                    {% if info.bimestres[bim] is not none %}
+                                        {{ info.bimestres[bim] }}
+                                    {% else %}
+                                        <span style="color: #64748b;">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <hr style="border-color: #334155;">
+                        <div class="text-center">
+                            <div style="color: #94a3b8; font-size: 0.8rem;">Média Final</div>
+                            {% if info.media is not none %}
+                            <div style="color: #facc15; font-size: 1.8rem; font-weight: 800;">{{ info.media }}</div>
+                            {% else %}
+                            <div style="color: #64748b; font-size: 1.2rem;">Incompleto</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3" style="background: #0f172a; border-radius: 10px;">
+                        <div class="fw-bold mb-2" style="color: #94a3b8;">📋 Frequência</div>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div style="color: #34D399; font-size: 1.5rem; font-weight: 700;">{{ info.frequencia.presente }}</div>
+                                <div style="color: #94a3b8; font-size: 0.8rem;">Presente</div>
+                            </div>
+                            <div class="col-4">
+                                <div style="color: #F87171; font-size: 1.5rem; font-weight: 700;">{{ info.frequencia.falta }}</div>
+                                <div style="color: #94a3b8; font-size: 0.8rem;">Falta</div>
+                            </div>
+                            <div class="col-4">
+                                <div style="color: #FBBF24; font-size: 1.5rem; font-weight: 700;">{{ info.frequencia.justificada }}</div>
+                                <div style="color: #94a3b8; font-size: 0.8rem;">Justif.</div>
+                            </div>
+                        </div>
+                        <hr style="border-color: #334155;">
+                        <div class="text-center">
+                            <div style="color: #94a3b8; font-size: 0.8rem;">Presença</div>
+                            {% if info.percentual_presenca is not none %}
+                            <div style="font-size: 1.8rem; font-weight: 800;" class="{% if info.percentual_presenca >= 75 %}text-success{% elif info.percentual_presenca >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                                {{ info.percentual_presenca }}%
+                            </div>
+                            <small style="color: #64748b;">{{ info.total_aulas }} aulas</small>
+                            {% else %}
+                            <div style="color: #64748b; font-size: 1.2rem;">Sem registros</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Resumo Geral -->
+    <div class="card border-0 shadow" style="background: #1e293b;">
+        <div class="card-body p-4">
+            <h4 class="fw-bold mb-4" style="color: #f1f5f9;">📈 Resumo Geral</h4>
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div style="color: #94a3b8;">Média Geral</div>
+                    {% if media_geral is not none %}
+                    <div style="color: #facc15; font-size: 2.5rem; font-weight: 800;">{{ media_geral }}</div>
+                    {% else %}
+                    <div style="color: #64748b; font-size: 1.5rem;">Incompleto</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <div style="color: #94a3b8;">Frequência Geral</div>
+                    {% if percentual_geral is not none %}
+                    <div style="font-size: 2.5rem; font-weight: 800;" class="{% if percentual_geral >= 75 %}text-success{% elif percentual_geral >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                        {{ percentual_geral }}%
+                    </div>
+                    <small style="color: #64748b;">{{ total_presentes_geral }}/{{ total_aulas_geral }} aulas</small>
+                    {% else %}
+                    <div style="color: #64748b; font-size: 1.5rem;">Sem registros</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <div style="color: #94a3b8;">Situação Final</div>
+                    {% if situacao_geral == 'Aprovado' %}
+                        <div class="badge bg-success" style="font-size: 1.3rem; padding: 12px 24px;">✅ Aprovado</div>
+                    {% elif situacao_geral == 'Reprovado' %}
+                        <div class="badge bg-danger" style="font-size: 1.3rem; padding: 12px 24px;">❌ Reprovado</div>
+                    {% else %}
+                        <div class="badge bg-secondary" style="font-size: 1.3rem; padding: 12px 24px;">⏳ Em andamento</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="card border-0 shadow p-5 text-center" style="background: #1e293b;">
+        <div style="font-size: 3rem;">📭</div>
+        <h4 class="mt-3" style="color: #f1f5f9;">Nenhuma nota lançada ainda</h4>
+        <p style="color: #94a3b8;">Aguarde o lançamento das notas pelos professores.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

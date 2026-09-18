@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Professores - Sistema Escolar{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Professores</h1>
+            <p class="text-secondary">{{ professores|length }} professor(es) cadastrado(s)</p>
+        </div>
+        {% if pode_editar %}
+        <a href="{{ url_for('professores.cadastrar') }}" class="btn btn-success">+ Novo Professor</a>
+        {% endif %}
+    </div>
+
+    <!-- BUSCA -->
+    <div class="card border-0 shadow mb-4 p-3">
+        <form method="GET" action="{{ url_for('professores.listar') }}" class="d-flex gap-2">
+            <input type="text" name="busca" class="form-control" placeholder="Buscar professor..." value="{{ busca }}">
+            <button type="submit" class="btn btn-primary px-4">Buscar</button>
+            {% if busca %}
+            <a href="{{ url_for('professores.listar') }}" class="btn btn-outline-secondary">Limpar</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body">
+            {% if professores %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nome</th>
+                        <th>Disciplinas</th>
+                        <th>Turmas</th>
+                        <th>Email</th>
+                        {% if pode_editar %}<th>Ações</th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prof in professores %}
+                    <tr>
+                        <td class="text-secondary">{{ prof.id }}</td>
+                        <td class="fw-semibold">{{ prof.nome }}</td>
+                        <td>{{ prof.disciplinas|join(', ') or '-' }}</td>
+                        <td>{{ prof.turmas_lista|join(', ') or '-' }}</td>
+                        <td>{{ prof.email or '-' }}</td>
+                        {% if pode_editar %}
+                        <td>
+                            <a href="{{ url_for('professores.editar', prof_id=prof.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                            <form action="{{ url_for('professores.excluir', prof_id=prof.id) }}" method="POST" class="d-inline"
+                                  onsubmit="return confirm('Excluir professor {{ prof.nome }}?')">
+                                <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                            </form>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-center p-5">
+                <h4>Nenhum professor encontrado</h4>
+                <p>{% if busca %}Nenhum resultado para "{{ busca }}".{% else %}Clique em "Novo Professor" para cadastrar.{% endif %}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

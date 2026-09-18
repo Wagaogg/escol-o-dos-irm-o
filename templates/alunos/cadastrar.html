@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Cadastrar Aluno - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">Cadastrar Aluno</h1>
+            <p style="color: #94a3b8;">Adicione um novo aluno ao sistema.</p>
+        </div>
+        <!-- CORRIGIDO: alunos_lista → alunos.listar -->
+        <a href="{{ url_for('alunos.listar') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card shadow border-0" style="background: #1e293b;">
+        <div class="card-body p-4">
+
+            <form action="{{ url_for('alunos.salvar') }}" method="POST" id="formCadastroAluno">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Nome Completo *</label>
+                        <input type="text" name="nome" class="form-control" placeholder="Nome do aluno" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Matrícula *</label>
+                        <input type="text" name="matricula" class="form-control" placeholder="Ex: 2026001" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" style="color: #f1f5f9;">Data de Nascimento</label>
+                        <input type="text" name="data_nascimento" class="form-control" 
+                               placeholder="dd/mm/aaaa" maxlength="10"
+                               oninput="mascaraData(this)" 
+                               style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                        <small class="text-secondary">Formato: dd/mm/aaaa (ex: 15/03/2010)</small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" style="color: #f1f5f9;">Série</label>
+                        <select name="serie" class="form-control" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                            <option value="">Selecione...</option>
+                            <option value="1º Ano">1º Ano</option>
+                            <option value="2º Ano">2º Ano</option>
+                            <option value="3º Ano">3º Ano</option>
+                            <option value="4º Ano">4º Ano</option>
+                            <option value="5º Ano">5º Ano</option>
+                            <option value="6º Ano">6º Ano</option>
+                            <option value="7º Ano">7º Ano</option>
+                            <option value="8º Ano">8º Ano</option>
+                            <option value="9º Ano">9º Ano</option>
+                            <option value="1º EM">1º EM</option>
+                            <option value="2º EM">2º EM</option>
+                            <option value="3º EM">3º EM</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" style="color: #f1f5f9;">Turma</label>
+                        <input type="text" name="turma" class="form-control" placeholder="Ex: 2ºA / 2º Info" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="email@aluno.com" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Telefone</label>
+                        <input type="text" name="telefone" class="form-control" placeholder="(11) 99999-9999" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                </div>
+
+                <!-- Responsáveis -->
+                <div class="mt-4">
+                    <h5 class="fw-bold" style="color: #f1f5f9;">👨‍👩‍👦 Responsáveis</h5>
+                    <div id="responsaveis-container">
+                        <div class="row g-2 mb-2 responsavel-item">
+                            <div class="col-md-4">
+                                <input type="text" name="resp_nome[]" class="form-control" placeholder="Nome do responsável" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="resp_telefone[]" class="form-control" placeholder="Telefone" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="resp_parentesco[]" class="form-control" placeholder="Parentesco (ex: Pai)" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger btn-sm remover-responsavel">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add-responsavel" style="color: #60A5FA; border-color: #60A5FA;">+ Adicionar Responsável</button>
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">✅ Cadastrar Aluno</button>
+                    <a href="{{ url_for('alunos.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/mascara.js') }}"></script>
+<script>
+document.getElementById('add-responsavel').addEventListener('click', function() {
+    const container = document.getElementById('responsaveis-container');
+    const clone = container.querySelector('.responsavel-item').cloneNode(true);
+    clone.querySelectorAll('input').forEach(inp => inp.value = '');
+    container.appendChild(clone);
+});
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remover-responsavel')) {
+        const item = e.target.closest('.responsavel-item');
+        if (document.querySelectorAll('.responsavel-item').length > 1) {
+            item.remove();
+        } else {
+            alert('Deve haver pelo menos um responsável.');
+        }
+    }
+});
+
+document.getElementById('formCadastroAluno').addEventListener('submit', function(e) {
+    const dataInput = document.querySelector('input[name="data_nascimento"]');
+    const data = dataInput.value.trim();
+
+    if (data && !validarDataBR(data)) {
+        alert('Data de nascimento inválida. Use o formato dd/mm/aaaa (ex: 15/03/2010)');
+        e.preventDefault();
+        dataInput.focus();
+        return;
+    }
+});
+</script>
+
+{% endblock %}

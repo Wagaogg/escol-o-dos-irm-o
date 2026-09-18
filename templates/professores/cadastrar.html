@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Cadastrar Professor - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold" style="color: #f1f5f9;">Cadastrar Professor</h1>
+            <p style="color: #94a3b8;">Adicione um novo professor ao sistema. Disciplinas e turmas serão definidas depois.</p>
+        </div>
+        <!-- CORRIGIDO: professores → professores.listar -->
+        <a href="{{ url_for('professores.listar') }}" class="btn btn-secondary">← Voltar</a>
+    </div>
+
+    <div class="card shadow border-0" style="background: #1e293b;">
+        <div class="card-body p-4">
+
+            <!-- CORRIGIDO: salvar_professor → professores.salvar -->
+            <form action="{{ url_for('professores.salvar') }}" method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Nome *</label>
+                        <input type="text" name="nome" class="form-control" placeholder="Nome completo" required style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="email@professor.com" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="color: #f1f5f9;">Telefone</label>
+                        <input type="text" name="telefone" class="form-control" placeholder="(11) 99999-9999" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">✅ Cadastrar Professor</button>
+                    <!-- CORRIGIDO: professores → professores.listar -->
+                    <a href="{{ url_for('professores.listar') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

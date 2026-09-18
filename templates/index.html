@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-10">
+
+            <div class="card shadow border-0 rounded-4">
+
+                <div class="card-body p-5">
+
+                    <div class="text-center mb-5">
+
+                        <h1 class="fw-bold">
+
+                            Sistema Escolar 2026
+
+                        </h1>
+
+                        <p class="text-secondary">
+
+                            Painel principal do sistema
+
+                        </p>
+
+                    </div>
+
+                    <div class="row g-4">
+
+                        <div class="col-md-4">
+
+                            <div class="card border-0 shadow-sm h-100">
+
+                                <div class="card-body text-center">
+
+                                    <h3 class="fw-bold text-primary">
+
+                                        Alunos
+
+                                    </h3>
+
+                                    <p class="text-secondary">
+
+                                        Gerencie alunos cadastrados.
+
+                                    </p>
+
+                                    <a href="/alunos"
+                                        class="btn btn-primary">
+
+                                        Acessar
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <div class="card border-0 shadow-sm h-100">
+
+                                <div class="card-body text-center">
+
+                                    <h3 class="fw-bold text-success">
+
+                                        Professores
+
+                                    </h3>
+
+                                    <p class="text-secondary">
+
+                                        Controle professores e turmas.
+
+                                    </p>
+
+                                    <a href="/professores"
+                                        class="btn btn-success">
+
+                                        Acessar
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <div class="card border-0 shadow-sm h-100">
+
+                                <div class="card-body text-center">
+
+                                    <h3 class="fw-bold text-warning">
+
+                                        Administração
+
+                                    </h3>
+
+                                    <p class="text-secondary">
+
+                                        Área administrativa do sistema.
+
+                                    </p>
+
+                                    <a href="/dashboard"
+                                        class="btn btn-warning">
+
+                                        Painel
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
