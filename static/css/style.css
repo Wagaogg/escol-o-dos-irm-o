@@ -46,7 +46,7 @@ body {
 
 main {
     flex: 1;
-    padding: 32px 0;
+    padding: 24px 0;
 }
 
 /* ==============================
@@ -59,10 +59,10 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.01em;
 }
 
-h1 { font-size: 1.75rem; }
-h2 { font-size: 1.4rem; }
-h3 { font-size: 1.2rem; }
-h4 { font-size: 1.05rem; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1rem; }
 
 p { color: var(--text-muted); }
 
@@ -80,22 +80,22 @@ a:hover { color: #60A5FA; }
 .navbar {
     background: var(--surface) !important;
     border-bottom: 1px solid var(--border);
-    padding: 12px 0;
-    box-shadow: var(--shadow);
+    padding: 8px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .navbar-brand {
     color: var(--text) !important;
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 700;
     letter-spacing: -0.02em;
 }
 
 .navbar .nav-link {
     color: var(--text-muted) !important;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 500;
-    padding: 6px 14px !important;
+    padding: 6px 12px !important;
     border-radius: var(--radius-sm);
     transition: background 0.15s, color 0.15s;
 }
@@ -132,7 +132,42 @@ a:hover { color: #60A5FA; }
 }
 
 .card-body {
-    padding: 24px;
+    padding: 20px;
+}
+
+/* Cards de dashboard compactos */
+.dashboard-card .card-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 170px;
+}
+
+.dashboard-card .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.dashboard-card .stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.dashboard-card .stat-desc {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+}
+
+.dashboard-card .btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    margin-top: auto;
 }
 
 /* ==============================
@@ -244,20 +279,20 @@ a:hover { color: #60A5FA; }
 .table thead th {
     background: var(--surface-2) !important;
     color: var(--text-muted) !important;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-color: var(--border) !important;
-    padding: 12px 16px;
+    padding: 10px 14px;
 }
 
 .table tbody td {
     background: var(--surface) !important;
     color: var(--text) !important;
     border-color: var(--border) !important;
-    padding: 14px 16px;
-    font-size: 0.9rem;
+    padding: 12px 14px;
+    font-size: 0.875rem;
     vertical-align: middle;
 }
 
@@ -285,7 +320,7 @@ footer {
     border-top: 1px solid var(--border);
     color: var(--text-dim);
     text-align: center;
-    padding: 20px;
+    padding: 16px;
     font-size: 0.8rem;
     margin-top: auto;
 }
@@ -313,6 +348,12 @@ footer {
 .text-secondary, .text-muted { color: var(--text-muted) !important; }
 .text-dim { color: var(--text-dim) !important; }
 
+/* Grid mais compacto */
+.row.g-3 {
+    --bs-gutter-x: 0.9rem;
+    --bs-gutter-y: 0.9rem;
+}
+
 /* ==============================
    LOGIN
 ============================== */
@@ -329,14 +370,14 @@ footer {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 40px;
+    padding: 36px 32px;
     width: 100%;
-    max-width: 420px;
+    max-width: 400px;
     box-shadow: var(--shadow-lg);
 }
 
 .login-card h1 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     text-align: center;
     margin-bottom: 4px;
 }
@@ -344,6 +385,6 @@ footer {
 .login-card .subtitle {
     text-align: center;
     color: var(--text-muted);
-    font-size: 0.875rem;
-    margin-bottom: 28px;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
 }

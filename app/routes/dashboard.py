@@ -3,12 +3,10 @@ from app.models.usuario import Usuario
 from app.models.aluno import Aluno
 from app.models.professor import Professor
 from app.models.livro import Livro
+from app.models.frequencia import Frequencia
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
-# =========================
-# PERMISSÕES
-# =========================
 def is_admin():
     return session.get("tipo") in ["admin", "diretor"]
 
@@ -21,20 +19,15 @@ def is_professor():
 def is_aluno():
     return session.get("tipo") == "aluno"
 
-# =========================
-# DASHBOARD
-# =========================
 @dashboard_bp.route("/dashboard")
 def index():
     if 'usuario_id' not in session:
         return redirect(url_for('auth.login'))
     
-    # Consultas ao SQLite
     total_alunos = Aluno.query.count()
     total_professores = Professor.query.count()
-    livros = Livro.query.all()
-    total_livros = len(livros)
-    disponiveis = sum(1 for l in livros if l.estoque > 0)
+    total_livros = Livro.query.count()
+    disponiveis = Livro.query.filter(Livro.estoque > 0).count()
     
     aluno_logado = None
     if is_aluno():
@@ -51,3 +44,34 @@ def index():
         disponiveis=disponiveis,
         aluno_logado=aluno_logado
     )
+
+# =========================
+# API - ESTATÍSTICAS DO DASHBOARD
+# =========================
+@dashboard_bp.route("/api/dashboard/estatisticas")
+def api_estatisticas():
+    if 'usuario_id' not in session:
+        return {"error": "Não autorizado"}, 401
+    
+    # Top 5 livros mais emprestados
+    livros = Livro.query.all()
+    top_livros = []
+    for l in livros:
+        emprestados = l.quantidade - l.estoque
+        if emprestados > 0:
+            top_livros.append({"label": l.titulo, "value": emprestados})
+    top_livros = sorted(top_livros, key=lambda x: x["value"], reverse=True)[:5]
+    
+    # Frequência geral
+    total_presente = Frequencia.query.filter_by(status="presente").count()
+    total_falta = Frequencia.query.filter_by(status="falta").count()
+    total_justificada = Frequencia.query.filter_by(status="justificada").count()
+    
+    return {
+        "top_livros": top_livros,
+        "frequencia": {
+            "presente": total_presente,
+            "falta": total_falta,
+            "justificada": total_justificada
+        }
+    }
