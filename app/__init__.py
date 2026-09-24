@@ -5,6 +5,8 @@ from flask_mail import Mail
 import os
 from datetime import timedelta
 
+
+
 # =========================
 # EXTENSÕES (instanciadas fora do create_app)
 # =========================
@@ -57,6 +59,8 @@ def create_app():
     from app.routes.notificacoes import notificacoes_bp
     from app.routes.frequencia import frequencia_bp
     from app.routes.gamificacao import gamificacao_bp
+    from app.routes.configuracoes import configuracoes_bp
+
     
     app.register_blueprint(auth_bp, url_prefix='/')
     app.register_blueprint(dashboard_bp, url_prefix='/')
@@ -68,6 +72,7 @@ def create_app():
     app.register_blueprint(notificacoes_bp, url_prefix='/')
     app.register_blueprint(frequencia_bp, url_prefix='/')
     app.register_blueprint(gamificacao_bp, url_prefix='/')
+    app.register_blueprint(configuracoes_bp, url_prefix='/')
 
       # NOVO
     

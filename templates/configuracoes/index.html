@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+{% block title %}Configurações - SEApp{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/configuracoes.css') }}">
+
+<div class="page-title">Configurações</div>
+<div class="page-subtitle">Personalize o sistema do seu jeito.</div>
+
+<div class="config-layout">
+
+    <!-- Menu lateral -->
+    <aside class="config-sidebar">
+        <button class="config-tab active" onclick="abrirAba('aparencia', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484-.08.08-.162.03-.232.03-.146 0-.29.068-.382.147a.32.32 0 0 0-.06.267c.06.272.15.504.167.602.02.109-.03.169-.13.237a.78.78 0 0 1-.337.06c-.51 0-1.007-.178-1.314-.464-.198-.184-.337-.44-.355-.71-.02-.278.08-.543.29-.746.09-.088.145-.152.173-.207a.348.348 0 0 0-.026-.337c-.194-.302-.545-.442-.95-.442-.436 0-.79.16-.973.432-.183.271-.168.647.08.87.048.043.164.12.267.19.15.102.207.177.207.288 0 .14-.11.245-.327.245-.26 0-.482-.156-.712-.36z"/>
+            </svg>
+            Aparência
+        </button>
+        <button class="config-tab" onclick="abrirAba('conta', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Z"/>
+            </svg>
+            Conta
+        </button>
+        <button class="config-tab" onclick="abrirAba('notificacoes', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917z"/>
+            </svg>
+            Notificações
+        </button>
+        <button class="config-tab" onclick="abrirAba('privacidade', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M5.338 1.59a61.44 61.44 0 0 0-2.837.856.481.481 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.725 10.725 0 0 0 2.287 2.233c.346.244.652.42.893.533.12.057.218.095.293.118a.55.55 0 0 0 .101.025.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.775 11.775 0 0 1-2.517 2.453 7.159 7.159 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7.158 7.158 0 0 1-1.048-.625 11.777 11.777 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 62.456 62.456 0 0 1 5.072.56z"/>
+            </svg>
+            Privacidade
+        </button>
+    </aside>
+
+    <!-- Conteúdo -->
+    <div class="config-content">
+
+        <!-- APARÊNCIA -->
+        <div class="config-section active" id="section-aparencia">
+            <div class="config-panel">
+                <h3>Aparência</h3>
+                <p class="panel-desc">Personalize como o sistema aparece pra você.</p>
+
+                <div class="config-row">
+                    <div>
+                        <div class="config-row-label">Tema</div>
+                        <div class="config-row-desc">Escolha entre escuro e claro.</div>
+                    </div>
+                </div>
+
+                <div class="theme-options" style="margin-bottom: 24px;">
+                    <div class="theme-option {% if config.tema == 'escuro' %}selected{% endif %}" data-tema="escuro">
+                        <div class="theme-preview escuro"></div>
+                        <div style="font-size: 0.85rem; color: var(--text);">Escuro</div>
+                    </div>
+                    <div class="theme-option {% if config.tema == 'claro' %}selected{% endif %}" data-tema="claro">
+                        <div class="theme-preview claro"></div>
+                        <div style="font-size: 0.85rem; color: var(--text);">Claro</div>
+                    </div>
+                </div>
+
+                <div class="config-row">
+                    <div>
+                        <div class="config-row-label">Cor de destaque</div>
+                        <div class="config-row-desc">Cor dos botões e links principais.</div>
+                    </div>
+                </div>
+
+                <div class="color-palette" id="paletaCores" style="margin-bottom: 12px;">
+                    <div class="color-option {% if config.cor_destaque == '#5865F2' %}selected{% endif %}" style="background: #5865F2;" data-cor="#5865F2"></div>
+                    <div class="color-option {% if config.cor_destaque == '#3B82F6' %}selected{% endif %}" style="background: #3B82F6;" data-cor="#3B82F6"></div>
+                    <div class="color-option {% if config.cor_destaque == '#10B981' %}selected{% endif %}" style="background: #10B981;" data-cor="#10B981"></div>
+                    <div class="color-option {% if config.cor_destaque == '#F59E0B' %}selected{% endif %}" style="background: #F59E0B;" data-cor="#F59E0B"></div>
+                    <div class="color-option {% if config.cor_destaque == '#EF4444' %}selected{% endif %}" style="background: #EF4444;" data-cor="#EF4444"></div>
+                    <div class="color-option {% if config.cor_destaque == '#A78BFA' %}selected{% endif %}" style="background: #A78BFA;" data-cor="#A78BFA"></div>
+                    <div class="color-option {% if config.cor_destaque == '#EC4899' %}selected{% endif %}" style="background: #EC4899;" data-cor="#EC4899"></div>
+                    <div class="color-option {% if config.cor_destaque == '#14B8A6' %}selected{% endif %}" style="background: #14B8A6;" data-cor="#14B8A6"></div>
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label class="form-label" style="margin: 0;">Cor personalizada:</label>
+                    <input type="color" id="corCustom" value="{{ config.cor_destaque }}" style="width: 50px; height: 36px; border: none; background: transparent; cursor: pointer;">
+                </div>
+
+                <div class="config-row" style="margin-top: 24px;">
+                    <div>
+                        <div class="config-row-label">Densidade</div>
+                        <div class="config-row-desc">Espaçamento dos elementos na tela.</div>
+                    </div>
+                </div>
+
+                <div class="density-options" style="margin-bottom: 24px;">
+                    <div class="density-option {% if config.densidade == 'confortavel' %}selected{% endif %}" data-densidade="confortavel">
+                        Confortável
+                    </div>
+                    <div class="density-option {% if config.densidade == 'compacto' %}selected{% endif %}" data-densidade="compacto">
+                        Compacto
+                    </div>
+                </div>
+
+                <div class="config-row">
+                    <div>
+                        <div class="config-row-label">Tamanho da fonte</div>
+                        <div class="config-row-desc">Ajuste o tamanho do texto no sistema.</div>
+                    </div>
+                    <div style="width: 200px;">
+                        <input type="range" id="tamanhoFonte" min="13" max="18" value="{{ config.tamanho_fonte }}">
+                        <div style="text-align: center; font-size: 0.85rem; color: var(--text-2); margin-top: 4px;"><span id="valorFonte">{{ config.tamanho_fonte }}</span>px</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CONTA -->
+        <div class="config-section" id="section-conta">
+            <div class="config-panel">
+                <h3>Conta</h3>
+                <p class="panel-desc">Gerencie suas informações pessoais.</p>
+
+                <div class="mb-3">
+                    <label class="form-label">Nome</label>
+                    <input type="text" id="contaNome" class="form-control" value="{{ usuario.nome }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="contaEmail" class="form-control" value="{{ usuario.email }}">
+                </div>
+
+                <button class="btn btn-primary mt-2" onclick="salvarConta()">Salvar Alterações</button>
+
+                <hr style="border-color: var(--border); margin: 30px 0;">
+
+                <h4 style="font-size: 1rem; margin-bottom: 12px;">Alterar senha</h4>
+
+                <div class="mb-3">
+                    <label class="form-label">Senha atual</label>
+                    <input type="password" id="senhaAtual" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nova senha</label>
+                    <input type="password" id="novaSenha" class="form-control">
+                </div>
+
+                <button class="btn btn-warning" onclick="alterarSenha()">Alterar senha</button>
+            </div>
+        </div>
+
+        <!-- NOTIFICAÇÕES -->
+        <div class="config-section" id="section-notificacoes">
+            <div class="config-panel">
+                <h3>Notificações</h3>
+                <p class="panel-desc">Escolha quais notificações você quer receber.</p>
+
+                <div class="config-row">
+                    <div>
+                        <div class="config-row-label">Empréstimos de livros</div>
+                        <div class="config-row-desc">Quando um livro for emprestado ou devolvido pra você.</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifEmprestimo" {% if config.notif_emprestimo %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="config-row">
+                    <div>
+                        <div class="config-row-label">Lançamento de notas</div>
+                        <div class="config-row-desc">Quando uma nota for lançada no seu boletim.</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifNota" {% if config.notif_nota %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="config-row">
+                    <div>
+                        <div class="config-row-label">Faltas registradas</div>
+                        <div class="config-row-desc">Quando uma falta for registrada no seu nome.</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifFalta" {% if config.notif_falta %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRIVACIDADE -->
+        <div class="config-section" id="section-privacidade">
+            <div class="config-panel">
+                <h3>Privacidade</h3>
+                <p class="panel-desc">Controle quem pode ver suas informações.</p>
+
+                <div class="config-row">
+                    <div>
+                        <div class="config-row-label">Perfil público</div>
+                        <div class="config-row-desc">Permitir que outros usuários vejam seu perfil.</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="perfilPublico" {% if config.perfil_publico %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/configuracoes.js') }}"></script>
+<script>
+// =========================
+// TABS
+// =========================
+function abrirAba(nome, btn) {
+    document.querySelectorAll('.config-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.config-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('section-' + nome).classList.add('active');
+    btn.classList.add('active');
+}
+
+// =========================
+// SALVAR CONFIG
+// =========================
+function salvarConfig(dados) {
+    fetch('/api/configuracoes/salvar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+    }).then(res => res.json()).then(data => {
+        if (data.ok) {
+            aplicarConfig(data.config);
+        }
+    });
+}
+
+// =========================
+// TEMA
+// =========================
+document.querySelectorAll('.theme-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        salvarConfig({ tema: this.dataset.tema });
+    });
+});
+
+// =========================
+// COR DE DESTAQUE
+// =========================
+document.querySelectorAll('.color-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        salvarConfig({ cor_destaque: this.dataset.cor });
+    });
+});
+
+document.getElementById('corCustom').addEventListener('change', function() {
+    document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+    salvarConfig({ cor_destaque: this.value });
+});
+
+// =========================
+// DENSIDADE
+// =========================
+document.querySelectorAll('.density-option').forEach(opt => {
+    opt.addEventListener('click', function() {
+        document.querySelectorAll('.density-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        salvarConfig({ densidade: this.dataset.densidade });
+    });
+});
+
+// =========================
+// TAMANHO DA FONTE
+// =========================
+document.getElementById('tamanhoFonte').addEventListener('input', function() {
+    document.getElementById('valorFonte').textContent = this.value;
+    document.body.style.fontSize = this.value + 'px';
+});
+document.getElementById('tamanhoFonte').addEventListener('change', function() {
+    salvarConfig({ tamanho_fonte: this.value });
+});
+
+// =========================
+// NOTIFICAÇÕES
+// =========================
+['notifEmprestimo', 'notifNota', 'notifFalta'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('change', function() {
+            const key = id.replace('notif', 'notif_').toLowerCase();
+            salvarConfig({ [key]: this.checked });
+        });
+    }
+});
+
+// =========================
+// PRIVACIDADE
+// =========================
+const perfilPublico = document.getElementById('perfilPublico');
+if (perfilPublico) {
+    perfilPublico.addEventListener('change', function() {
+        salvarConfig({ perfil_publico: this.checked });
+    });
+}
+
+// =========================
+// CONTA
+// =========================
+function salvarConta() {
+    const nome = document.getElementById('contaNome').value;
+    const email = document.getElementById('contaEmail').value;
+    
+    fetch('/api/configuracoes/conta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, email })
+    }).then(res => res.json()).then(data => {
+        if (data.ok) {
+            alert('Dados salvos com sucesso!');
+            location.reload();
+        } else {
+            alert('Erro: ' + (data.error || 'Não foi possível salvar'));
+        }
+    });
+}
+
+function alterarSenha() {
+    const senha_atual = document.getElementById('senhaAtual').value;
+    const nova_senha = document.getElementById('novaSenha').value;
+    
+    if (!senha_atual || !nova_senha) {
+        alert('Preencha os dois campos');
+        return;
+    }
+    
+    fetch('/api/configuracoes/conta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha_atual, nova_senha })
+    }).then(res => res.json()).then(data => {
+        if (data.ok) {
+            alert('Senha alterada com sucesso!');
+            document.getElementById('senhaAtual').value = '';
+            document.getElementById('novaSenha').value = '';
+        } else {
+            alert('Erro: ' + (data.error || 'Não foi possível alterar'));
+        }
+    });
+}
+</script>
+
+{% endblock %}

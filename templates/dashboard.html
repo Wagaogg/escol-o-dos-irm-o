@@ -3,253 +3,128 @@
 
 {% block content %}
 
-<div class="container">
+<div class="page-title">Início</div>
+<div class="page-subtitle">Bem-vindo de volta, {{ usuario }}.</div>
 
-    <div class="mb-4">
-        <h1>Início</h1>
-        <p class="text-secondary mb-0" style="font-size: 0.9rem;">Bem-vindo, <strong style="color: var(--text);">{{ usuario }}</strong>.</p>
+{% if tipo in ['admin', 'diretor', 'professor'] %}
+
+<div class="row g-3">
+
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Alunos</div>
+            <div class="stat-number" style="color: #60A5FA;">{{ total_alunos }}</div>
+            <div class="stat-desc">cadastrados no sistema</div>
+            <a href="{{ url_for('alunos.listar') }}" class="btn btn-primary">Ver Alunos</a>
+        </div>
     </div>
 
-    <!-- ========================================= -->
-    <!-- ADMIN / DIRETOR / PROFESSOR -->
-    <!-- ========================================= -->
-    {% if tipo in ['admin', 'diretor', 'professor'] %}
-
-    <div class="row g-3">
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Alunos</div>
-                    <div class="stat-number" style="color: #60A5FA;">{{ total_alunos }}</div>
-                    <div class="stat-desc">cadastrados no sistema</div>
-                    <a href="{{ url_for('alunos.listar') }}" class="btn btn-primary w-100">Ver Alunos</a>
-                </div>
-            </div>
+    {% if tipo in ['admin', 'diretor'] %}
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Professores</div>
+            <div class="stat-number" style="color: #4ADE80;">{{ total_professores }}</div>
+            <div class="stat-desc">cadastrados no sistema</div>
+            <a href="{{ url_for('professores.listar') }}" class="btn btn-success">Ver Professores</a>
         </div>
-
-        {% if tipo in ['admin', 'diretor'] %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Professores</div>
-                    <div class="stat-number" style="color: #34D399;">{{ total_professores }}</div>
-                    <div class="stat-desc">cadastrados no sistema</div>
-                    <a href="{{ url_for('professores.listar') }}" class="btn btn-success w-100">Ver Professores</a>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Biblioteca</div>
-                    <div class="stat-number" style="color: #FBBF24;">{{ disponiveis }}</div>
-                    <div class="stat-desc">livros disponíveis</div>
-                    <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning w-100">Ver Biblioteca</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Frequência</div>
-                    <div class="stat-number" style="color: #F87171;">📋</div>
-                    <div class="stat-desc">controle de presença</div>
-                    <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-danger w-100">Fazer Chamada</a>
-                </div>
-            </div>
-        </div>
-
-        {% if tipo == 'professor' %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Notas</div>
-                    <div class="stat-number" style="color: #A78BFA;">📝</div>
-                    <div class="stat-desc">lançamento de notas</div>
-                    <a href="{{ url_for('notas.lancar_nota') }}" class="btn btn-primary w-100">Lançar Nota</a>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Ranking</div>
-                    <div class="stat-number" style="color: #FBBF24;">🏆</div>
-                    <div class="stat-desc">classificação dos alunos</div>
-                    <a href="{{ url_for('gamificacao.ranking') }}" class="btn btn-warning w-100">Ver Ranking</a>
-                </div>
-            </div>
-        </div>
-
     </div>
-
-    <!-- ========================================= -->
-    <!-- ALUNO -->
-    <!-- ========================================= -->
-    {% elif tipo == 'aluno' %}
-
-    <div class="row g-3">
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Biblioteca</div>
-                    <div class="stat-number" style="color: #FBBF24;">{{ disponiveis }}</div>
-                    <div class="stat-desc">livros disponíveis</div>
-                    <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning w-100">Ver Biblioteca</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Meu Perfil</div>
-                    <div class="stat-number" style="color: #60A5FA;">👤</div>
-                    <div class="stat-desc">informações pessoais</div>
-                    <a href="{{ url_for('meu_perfil.meu_perfil') }}" class="btn btn-primary w-100">Ver Perfil</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Boletim</div>
-                    <div class="stat-number" style="color: #34D399;">📊</div>
-                    <div class="stat-desc">notas e frequência</div>
-                    {% if aluno_logado %}
-                    <a href="{{ url_for('notas.boletim', aluno_id=aluno_logado.id) }}" class="btn btn-success w-100">Ver Boletim</a>
-                    {% else %}
-                    <button class="btn btn-secondary w-100" disabled>Perfil incompleto</button>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Frequência</div>
-                    <div class="stat-number" style="color: #F87171;">📋</div>
-                    <div class="stat-desc">histórico de presença</div>
-                    <a href="{{ url_for('frequencia.minha_frequencia') }}" class="btn btn-danger w-100">Ver Frequência</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="card dashboard-card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Ranking</div>
-                    <div class="stat-number" style="color: #FBBF24;">🏆</div>
-                    <div class="stat-desc">sua posição na turma</div>
-                    <a href="{{ url_for('gamificacao.ranking') }}" class="btn btn-warning w-100">Ver Ranking</a>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    {% else %}
-    <div class="alert alert-warning">Tipo de usuário não reconhecido.</div>
     {% endif %}
 
-    <!-- ========================================= -->
-    <!-- GRÁFICOS -->
-    <!-- ========================================= -->
-    <div class="row g-3 mt-4">
-
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Top 5 Livros Mais Emprestados</div>
-                    <canvas id="graficoTopLivros" height="200"></canvas>
-                </div>
-            </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Biblioteca</div>
+            <div class="stat-number" style="color: #FBBF24;">{{ disponiveis }}</div>
+            <div class="stat-desc">livros disponíveis</div>
+            <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning">Ver Biblioteca</a>
         </div>
+    </div>
 
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="stat-label">Frequência Geral</div>
-                    <canvas id="graficoFrequencia" height="200"></canvas>
-                </div>
-            </div>
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Frequência</div>
+            <div class="stat-number" style="color: #F87171;">—</div>
+            <div class="stat-desc">controle de presença</div>
+            <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-danger">Fazer Chamada</a>
         </div>
+    </div>
 
+    {% if tipo == 'professor' %}
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Notas</div>
+            <div class="stat-number" style="color: #A78BFA;">—</div>
+            <div class="stat-desc">lançamento de notas</div>
+            <a href="{{ url_for('notas.lancar_nota') }}" class="btn btn-primary">Lançar Nota</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Ranking</div>
+            <div class="stat-number" style="color: #FBBF24;">🏆</div>
+            <div class="stat-desc">classificação dos alunos</div>
+            <a href="{{ url_for('gamificacao.ranking') }}" class="btn btn-warning">Ver Ranking</a>
+        </div>
     </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/dashboard/estatisticas')
-        .then(response => response.json())
-        .then(data => {
-            const topLivros = data.top_livros;
-            if (topLivros.length > 0) {
-                const ctx1 = document.getElementById('graficoTopLivros').getContext('2d');
-                new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: topLivros.map(l => l.label),
-                        datasets: [{
-                            label: 'Exemplares emprestados',
-                            data: topLivros.map(l => l.value),
-                            backgroundColor: '#3B82F6',
-                            borderRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' exemplar(es)' } }
-                        },
-                        scales: {
-                            x: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { display: false } },
-                            y: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { color: '#1F2937' }, beginAtZero: true }
-                        }
-                    }
-                });
-            } else {
-                document.getElementById('graficoTopLivros').parentElement.innerHTML += '<p style="color: #6B7280; font-size: 0.85rem; text-align: center; margin-top: 20px;">Nenhum livro emprestado ainda.</p>';
-            }
+{% elif tipo == 'aluno' %}
 
-            const freq = data.frequencia;
-            const ctx2 = document.getElementById('graficoFrequencia').getContext('2d');
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Presente', 'Falta', 'Justificada'],
-                    datasets: [{
-                        data: [freq.presente, freq.falta, freq.justificada],
-                        backgroundColor: ['#10B981', '#EF4444', '#F59E0B'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: '#9CA3AF', font: { size: 11 }, padding: 12 }
-                        }
-                    },
-                    cutout: '65%'
-                }
-            });
-        })
-        .catch(error => { console.error('Erro ao carregar gráficos:', error); });
-});
-</script>
+<div class="row g-3">
+
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Biblioteca</div>
+            <div class="stat-number" style="color: #FBBF24;">{{ disponiveis }}</div>
+            <div class="stat-desc">livros disponíveis</div>
+            <a href="{{ url_for('biblioteca.listar') }}" class="btn btn-warning">Ver Biblioteca</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Meu Perfil</div>
+            <div class="stat-number" style="color: #60A5FA;">—</div>
+            <div class="stat-desc">informações pessoais</div>
+            <a href="{{ url_for('meu_perfil.meu_perfil') }}" class="btn btn-primary">Ver Perfil</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Boletim</div>
+            <div class="stat-number" style="color: #4ADE80;">—</div>
+            <div class="stat-desc">notas e frequência</div>
+            {% if aluno_logado %}
+            <a href="{{ url_for('notas.boletim', aluno_id=aluno_logado.id) }}" class="btn btn-success">Ver Boletim</a>
+            {% else %}
+            <button class="btn btn-secondary" disabled>Perfil incompleto</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Frequência</div>
+            <div class="stat-number" style="color: #F87171;">—</div>
+            <div class="stat-desc">histórico de presença</div>
+            <a href="{{ url_for('frequencia.minha_frequencia') }}" class="btn btn-danger">Ver Frequência</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="dashboard-card">
+            <div class="stat-label">Ranking</div>
+            <div class="stat-number" style="color: #FBBF24;">🏆</div>
+            <div class="stat-desc">sua posição na turma</div>
+            <a href="{{ url_for('gamificacao.ranking') }}" class="btn btn-warning">Ver Ranking</a>
+        </div>
+    </div>
+
+</div>
+
+{% endif %}
 
 {% endblock %}
