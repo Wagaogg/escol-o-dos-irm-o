@@ -232,6 +232,10 @@ function abrirAba(nome, btn) {
 // SALVAR CONFIG
 // =========================
 function salvarConfig(dados) {
+    if (dados && dados.cor_destaque) {
+        try { localStorage.setItem('seapp_cor_destaque', dados.cor_destaque); } catch (e) {}
+    }
+
     fetch('/api/configuracoes/salvar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

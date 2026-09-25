@@ -4,7 +4,8 @@ from app.models.aluno import Aluno
 from app.models.usuario import Usuario
 from app.models.professor import Professor
 from datetime import datetime
-import json  # <-- import único no topo
+import json
+import re
 
 alunos_bp = Blueprint('alunos', __name__)
 
@@ -21,6 +22,21 @@ def is_professor():
     return session.get("tipo") == "professor"
 
 # =========================
+# NORMALIZAR TURMA
+# =========================
+def normalizar(texto):
+    """Remove TUDO que não for letra ou número e converte pra minúsculo.
+    Ex: '99° roblox' → '99roblox'
+        '99º roblox' → '99roblox'
+        '3A' → '3a'
+    """
+    if not texto:
+        return ""
+    texto = str(texto).lower()
+    texto = re.sub(r'[^a-z0-9]', '', texto)
+    return texto
+
+# =========================
 # LISTAR ALUNOS
 # =========================
 @alunos_bp.route("/alunos")
@@ -31,26 +47,49 @@ def listar():
         flash("Acesso negado.", "danger")
         return redirect(url_for('dashboard.index'))
     
-    # Busca todos os alunos
     alunos = Aluno.query.all()
     
-    # Se for professor, filtra pelas turmas dele
+    # 🔥 Se for professor, filtra apenas os alunos das turmas dele
     if is_professor():
         usuario_id = session.get('usuario_id')
         professor = Professor.query.filter_by(usuario_id=usuario_id).first()
+        
         if professor and professor.turmas_lista:
-            turmas_do_professor = json.loads(professor.turmas_lista) if professor.turmas_lista else []
-            turmas_do_professor = [t.strip().lower() for t in turmas_do_professor]
-            alunos = [a for a in alunos if a.turma and a.turma.strip().lower() in turmas_do_professor]
+            try:
+                turmas_do_professor = json.loads(professor.turmas_lista)
+            except:
+                turmas_do_professor = []
+            
+            turmas_norm = [normalizar(t) for t in turmas_do_professor if t]
+            
+            print(f"🔍 Professor: {professor.usuario.nome if professor.usuario else '?'}")
+            print(f"🔍 Turmas do professor: {turmas_do_professor}")
+            print(f"🔍 Turmas normalizadas: {turmas_norm}")
+            
+            alunos_filtrados = []
+            for a in alunos:
+                if a.turma:
+                    turma_norm = normalizar(a.turma)
+                    match = turma_norm in turmas_norm
+                    print(f"   Aluno: {a.usuario.nome if a.usuario else '?'} | Turma: '{a.turma}' | Normalizada: '{turma_norm}' | Match: {match}")
+                    if match:
+                        alunos_filtrados.append(a)
+            
+            alunos = alunos_filtrados
         else:
+            print("⚠️ Professor sem turmas cadastradas.")
             alunos = []
     
     # Busca (opcional)
     busca = request.args.get("busca", "").lower()
     if busca:
-        alunos = [a for a in alunos if busca in (a.usuario.nome.lower() if a.usuario else "") or busca in a.matricula.lower()]
+        alunos = [
+            a for a in alunos
+            if busca in (a.usuario.nome.lower() if a.usuario else "")
+            or busca in (a.matricula or "").lower()
+        ]
     
-    # Prepara lista para o template (com dados do usuário)
+    # Prepara lista pra o template
     alunos_lista = []
     for a in alunos:
         alunos_lista.append({
@@ -58,6 +97,7 @@ def listar():
             "nome": a.usuario.nome if a.usuario else "Sem nome",
             "matricula": a.matricula,
             "turma": a.turma,
+            "serie": a.serie,
             "foto": a.usuario.foto if a.usuario else None,
             "responsaveis": json.loads(a.responsaveis) if a.responsaveis else []
         })
@@ -111,23 +151,29 @@ def salvar():
                 "parentesco": parentescos[i].strip() if i < len(parentescos) else ""
             })
     
-    # Cria usuário associado (se email não existir)
+    # Cria usuário associado
     usuario = Usuario.query.filter_by(email=email).first()
     if not usuario:
-        usuario = Usuario(
-            nome=nome,
-            email=email,
-            tipo="aluno"
-        )
-        usuario.senha_criptografada = "temp123"  # senha temporária
+        usuario = Usuario(nome=nome, email=email, tipo="aluno")
+        usuario.senha_criptografada = "temp123"
         db.session.add(usuario)
         db.session.flush()
     
-    # Cria aluno
+    # Converte data
+    data_obj = None
+    if data_nascimento:
+        try:
+            data_obj = datetime.strptime(data_nascimento, "%d/%m/%Y").date()
+        except:
+            try:
+                data_obj = datetime.strptime(data_nascimento, "%Y-%m-%d").date()
+            except:
+                data_obj = None
+    
     novo_aluno = Aluno(
         usuario_id=usuario.id,
         matricula=matricula,
-        data_nascimento=datetime.strptime(data_nascimento, "%d/%m/%Y").date() if data_nascimento else None,
+        data_nascimento=data_obj,
         serie=serie,
         turma=turma,
         telefone=telefone,
@@ -156,7 +202,6 @@ def perfil(aluno_id):
         flash("Aluno não encontrado.", "danger")
         return redirect(url_for('alunos.listar'))
     
-    # Prepara dados para o template
     aluno_info = {
         "id": aluno.id,
         "nome": aluno.usuario.nome if aluno.usuario else "Sem nome",
@@ -193,7 +238,7 @@ def editar(aluno_id):
         "id": aluno.id,
         "nome": aluno.usuario.nome if aluno.usuario else "",
         "matricula": aluno.matricula,
-        "data_nascimento": aluno.data_nascimento.strftime("%d/%m/%Y") if aluno.data_nascimento else None,
+        "data_nascimento": aluno.data_nascimento.strftime("%d/%m/%Y") if aluno.data_nascimento else "",
         "serie": aluno.serie,
         "turma": aluno.turma,
         "email": aluno.usuario.email if aluno.usuario else "",
@@ -217,21 +262,23 @@ def atualizar(aluno_id):
         flash("Aluno não encontrado.", "danger")
         return redirect(url_for('alunos.listar'))
     
-    # Atualiza dados
     aluno.matricula = request.form.get("matricula")
-    data_nascimento = request.form.get("data_nascimento")
-    aluno.data_nascimento = datetime.strptime(data_nascimento, "%d/%m/%Y").date() if data_nascimento else None
     aluno.serie = request.form.get("serie")
     aluno.turma = request.form.get("turma")
     aluno.telefone = request.form.get("telefone")
     
-    # Atualiza usuário (nome e email)
+    data_nascimento = request.form.get("data_nascimento")
+    if data_nascimento:
+        try:
+            aluno.data_nascimento = datetime.strptime(data_nascimento, "%d/%m/%Y").date()
+        except:
+            pass
+    
     usuario = aluno.usuario
     if usuario:
         usuario.nome = request.form.get("nome")
         usuario.email = request.form.get("email")
     
-    # Processa responsáveis
     responsaveis = []
     nomes = request.form.getlist("resp_nome[]")
     telefones = request.form.getlist("resp_telefone[]")
@@ -265,14 +312,7 @@ def excluir(aluno_id):
         flash("Aluno não encontrado.", "danger")
         return redirect(url_for('alunos.listar'))
     
-    # Remove o aluno e o usuário associado
-    usuario_id = aluno.usuario_id
     db.session.delete(aluno)
-    if usuario_id:
-        usuario = Usuario.query.get(usuario_id)
-        if usuario:
-            db.session.delete(usuario)
     db.session.commit()
-    
     flash("Aluno excluído com sucesso!", "success")
     return redirect(url_for('alunos.listar'))

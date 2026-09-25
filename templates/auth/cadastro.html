@@ -1,45 +1,36 @@
 {% extends 'base.html' %}
-{% block title %}Criar Conta - Sistema Escolar{% endblock %}
+{% block title %}Criar Conta - SEApp{% endblock %}
 
-{% block content %}
+{% block content_auth %}
 
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card shadow p-4" style="width: 100%; max-width: 450px;">
-
-        <div class="text-center mb-4">
-            <h2 class="fw-bold">Criar Conta</h2>
-            <p class="text-secondary">Cadastre-se no sistema escolar</p>
-        </div>
+<div class="login-page">
+    <div class="login-card">
+        <div class="brand">SEApp</div>
+        <p class="subtitle">Crie sua conta</p>
 
         {% if erro == 1 %}
-        <div class="alert alert-danger">❌ Este email já está em uso.</div>
+        <div class="alert alert-danger">Este email já está em uso.</div>
         {% endif %}
 
         <form action="{{ url_for('auth.criar_conta') }}" method="POST">
-
             <div class="mb-3">
                 <label class="form-label">Nome</label>
-                <input type="text" name="nome" class="form-control" placeholder="Digite seu nome" required>
+                <input type="text" name="nome" class="form-control" placeholder="Seu nome" required>
             </div>
-
             <div class="mb-3">
                 <label class="form-label">Email</label>
                 <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
             </div>
-
             <div class="mb-4">
                 <label class="form-label">Senha</label>
-                <input type="password" name="senha" class="form-control" placeholder="••••••••" required>
+                <input type="password" name="senha" class="form-control" placeholder="Sua senha" required>
             </div>
-
-            <button type="submit" class="btn btn-success w-100">Criar Conta</button>
-
+            <button type="submit" class="btn btn-primary w-100">Criar Conta</button>
         </form>
 
-        <div class="text-center mt-3">
-            <a href="{{ url_for('auth.login') }}">Já possui conta? Entrar</a>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('auth.login') }}" style="font-size: 0.875rem;">Já tem conta? Entrar</a>
         </div>
-
     </div>
 </div>
 

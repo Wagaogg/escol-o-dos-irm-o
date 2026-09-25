@@ -5,23 +5,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg: #313338;              /* fundo principal (Discord) */
-    --bg-sidebar: #2B2D31;      /* sidebar (Discord) */
-    --bg-nav: #1E1F22;          /* navbar (Discord) */
-    --surface: #383A40;         /* cards */
-    --surface-hover: #404248;   /* hover */
+    --bg: #313338;
+    --bg-sidebar: #2B2D31;
+    --bg-nav: #1E1F22;
+    --surface: #383A40;
+    --surface-hover: #404248;
     --border: #26272B;
     --border-2: #4E5058;
     --text: #F2F3F5;
     --text-2: #B5BAC1;
     --text-3: #949BA4;
-    --primary: #5865F2;         /* azul Discord */
+    --primary: #5865F2;
     --primary-hover: #4752C4;
-    --success: #23A55A;         /* verde Discord */
+    --success: #23A55A;
     --success-hover: #1E8F4C;
-    --danger: #DA373C;          /* vermelho Discord */
+    --danger: #DA373C;
     --danger-hover: #A12828;
-    --warning: #F0B232;         /* amarelo Discord */
+    --warning: #F0B232;
     --warning-hover: #D89E2A;
     --radius: 8px;
     --radius-sm: 4px;
@@ -52,7 +52,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Layout com sidebar */
 .app-layout {
     display: flex;
     flex: 1;
@@ -97,8 +96,8 @@ body {
 }
 
 .sidebar-link.active {
-    background: var(--surface);
-    color: var(--text);
+    background: var(--primary);
+    color: white;
 }
 
 .sidebar-link svg {
@@ -208,7 +207,7 @@ a {
     color: var(--primary);
     transition: color 0.15s;
 }
-a:hover { color: #7983F5; }
+a:hover { filter: brightness(1.15); }
 
 .page-title {
     font-size: 1.5rem;
@@ -238,7 +237,6 @@ a:hover { color: #7983F5; }
     padding: 20px;
 }
 
-/* Cards de dashboard */
 .dashboard-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -307,7 +305,7 @@ a:hover { color: #7983F5; }
     border-radius: var(--radius-sm) !important;
     padding: 10px 12px !important;
     font-size: 0.9rem;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .form-control::placeholder { color: var(--text-3) !important; }
@@ -334,16 +332,48 @@ a:hover { color: #7983F5; }
     align-items: center;
     justify-content: center;
     gap: 6px;
+    --bs-btn-focus-box-shadow: none !important;
+    --bs-btn-active-shadow: none !important;
+}
+
+/* Remove flash azul de foco/clique */
+.btn:focus,
+.btn:active,
+.btn:focus-visible,
+.btn:not(:disabled):not(.disabled):active,
+.btn:not(:disabled):not(.disabled).active {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .btn-primary {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--primary);
+    --bs-btn-border-color: var(--primary);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--primary-hover);
+    --bs-btn-hover-border-color: var(--primary-hover);
+    --bs-btn-focus-shadow-rgb: 0, 0, 0;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--primary);
+    --bs-btn-active-border-color: var(--primary);
+}
+
+.btn-primary:focus,
+.btn-primary:focus-visible,
+.btn-primary:active,
+.btn-primary.active,
+.show > .btn-primary.dropdown-toggle {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+    box-shadow: none !important;
 }
 .btn-primary:hover {
-    background: var(--primary-hover);
-    border-color: var(--primary-hover);
+    filter: brightness(0.9);
     color: white;
 }
 
@@ -399,7 +429,7 @@ a:hover { color: #7983F5; }
 }
 
 /* ==============================
-   TABELAS (estilo GitHub)
+   TABELAS
 ============================== */
 
 .table {
@@ -562,8 +592,7 @@ body.tema-claro .topbar {
 }
 
 body.tema-claro .card,
-body.tema-claro .dashboard-card,
-body.tema-claro .config-panel {
+body.tema-claro .dashboard-card {
     background: var(--surface);
     border-color: var(--border);
 }
@@ -601,20 +630,61 @@ body.densidade-compacto .table thead th {
 }
 
 /* ==============================
-   SIDEBAR RECOLHIDA
+   REMOVE FLASH AZUL DE FOCO (TODOS OS BOTÕES)
 ============================== */
 
-.sidebar.recolhida {
-    width: 60px;
-    padding: 12px 6px;
+*:focus,
+*:focus-visible,
+*:active {
+    outline: none !important;
+    outline-width: 0 !important;
+    box-shadow: none !important;
 }
 
-.sidebar.recolhida .sidebar-link span,
-.sidebar.recolhida .sidebar-title {
-    display: none;
+button:focus,
+button:focus-visible,
+button:active,
+a:focus,
+a:focus-visible,
+a:active {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
-.sidebar.recolhida .sidebar-link {
-    justify-content: center;
-    padding: 10px;
+.btn,
+.btn-primary,
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-secondary,
+.btn-outline-secondary {
+    --bs-btn-focus-box-shadow: none !important;
+    --bs-btn-active-shadow: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.btn:focus,
+.btn:focus-visible,
+.btn:active,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-success:focus,
+.btn-success:active,
+.btn-danger:focus,
+.btn-danger:active,
+.btn-warning:focus,
+.btn-warning:active {
+    outline: none !important;
+    box-shadow: none !important;
+    --bs-btn-focus-box-shadow: none !important;
+    --bs-btn-active-shadow: none !important;
+}
+
+.btn {
+    -webkit-tap-highlight-color: transparent;
+}
+
+a, button {
+    -webkit-tap-highlight-color: transparent;
 }
