@@ -3,126 +3,163 @@
 
 {% block content %}
 
-<div class="container mt-5">
+<div class="page-title">Meu Perfil</div>
+<div class="page-subtitle">Suas informações no sistema.</div>
 
-    <div class="mb-4">
-        <h1 class="fw-bold" style="color: #f1f5f9;">👤 Meu Perfil</h1>
-        <p style="color: #94a3b8;">Suas informações no sistema.</p>
-    </div>
+{% if aluno %}
 
-    {% if aluno %}
+<div class="row g-3">
 
-    <div class="row g-4">
-
-        <div class="col-md-4">
-            <div class="card border-0 shadow p-4 text-center" style="background: #1e293b; color: #f1f5f9;">
+    <!-- CARD LATERAL -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
                 {% if foto %}
-                    <img src="{{ url_for('static', filename=foto) }}" alt="Foto" class="rounded-circle mx-auto d-block" style="width:120px;height:120px;object-fit:cover;border:3px solid #60A5FA;">
+                    <img src="{{ url_for('static', filename=foto) }}" alt="Foto" class="rounded-circle mx-auto d-block" style="width:120px;height:120px;object-fit:cover;border:3px solid var(--primary);">
                 {% else %}
-                    <span style="font-size:5rem;">👨‍🎓</span>
+                    <div style="font-size: 5rem; color: var(--text-3);">👨‍🎓</div>
                 {% endif %}
-                <h4 class="fw-bold mt-3" style="color: #f1f5f9;">{{ aluno.nome }}</h4>
+                <h4 class="fw-bold mt-3" style="color: var(--text);">{{ aluno.nome }}</h4>
                 <span class="badge bg-primary mt-1">{{ aluno.serie or 'Sem série' }}</span>
                 <span class="badge bg-secondary">Turma {{ aluno.turma or '-' }}</span>
-                <hr style="border-color:#334155;">
+                <hr style="border-color: var(--border);">
                 <div class="text-secondary small">Matrícula</div>
-                <div class="fw-bold fs-5" style="color: #f1f5f9;">{{ aluno.matricula or '-' }}</div>
-                <!-- CORRIGIDO: upload_foto → meu_perfil.upload_foto -->
-                <form action="{{ url_for('meu_perfil.upload_foto') }}" method="POST" enctype="multipart/form-data" class="mt-2">
-                    <input type="file" name="foto" class="form-control form-control-sm" accept=".jpg,.jpeg,.pdf" required>
-                    <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">📤 Enviar Foto</button>
-                    <small class="text-secondary">Apenas JPG e PDF</small>
+                <div class="fw-bold fs-5" style="color: var(--text);">{{ aluno.matricula or '-' }}</div>
+
+                <form action="{{ url_for('meu_perfil.upload_foto') }}" method="POST" enctype="multipart/form-data" class="mt-3">
+                    <input type="file" name="foto" class="form-control form-control-sm" accept=".jpg,.jpeg,.png,.pdf" required>
+                    <button type="submit" class="btn btn-primary btn-sm w-100 mt-2">Enviar Foto</button>
+                    <small class="text-secondary">JPG, PNG ou PDF</small>
                 </form>
             </div>
         </div>
 
-        <div class="col-md-8 d-flex flex-column gap-4">
+        <!-- RESUMO DE CONQUISTAS -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0" style="color: var(--text);">🏆 Conquistas</h6>
+                    <span style="color: var(--primary); font-weight: 700;">{{ total_desbloqueadas }}/{{ total_conquistas }}</span>
+                </div>
+                <div style="background: var(--surface-hover); border-radius: 10px; height: 8px; overflow: hidden; margin-bottom: 12px;">
+                    <div style="width: {{ percentual_conquistas }}%; height: 100%; background: var(--primary); transition: width 0.3s;"></div>
+                </div>
+                <a href="{{ url_for('conquistas.index') }}" class="btn btn-warning w-100">
+                    Ver Todas as Conquistas
+                </a>
+            </div>
+        </div>
+    </div>
 
-            <div class="card border-0 shadow p-4" style="background: #1e293b; color: #f1f5f9;">
-                <h5 class="fw-bold mb-4" style="color: #f1f5f9;">📋 Informações Pessoais</h5>
+    <!-- INFORMAÇÕES -->
+    <div class="col-md-8 d-flex flex-column gap-3">
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="fw-bold mb-4" style="color: var(--text);">Informações Pessoais</h5>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <span class="text-secondary">Nome</span>
-                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.nome }}</div>
+                        <div class="text-secondary small">Nome</div>
+                        <div class="fw-semibold" style="color: var(--text);">{{ aluno.nome }}</div>
                     </div>
                     <div class="col-md-6">
-                        <span class="text-secondary">Data Nasc.</span>
-                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.data_nascimento or '-' }}</div>
+                        <div class="text-secondary small">Data Nasc.</div>
+                        <div class="fw-semibold" style="color: var(--text);">{{ aluno.data_nascimento or '-' }}</div>
                     </div>
                     <div class="col-md-6">
-                        <span class="text-secondary">Email</span>
-                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.email or '-' }}</div>
+                        <div class="text-secondary small">Email</div>
+                        <div class="fw-semibold" style="color: var(--text);">{{ aluno.email or '-' }}</div>
                     </div>
                     <div class="col-md-6">
-                        <span class="text-secondary">Telefone</span>
-                        <div class="fw-semibold" style="color: #f1f5f9;">{{ aluno.telefone or '-' }}</div>
+                        <div class="text-secondary small">Telefone</div>
+                        <div class="fw-semibold" style="color: var(--text);">{{ aluno.telefone or '-' }}</div>
                     </div>
                 </div>
 
-                <!-- Responsáveis -->
-                {% if aluno.responsaveis %}
-                <h5 class="fw-bold mt-4" style="color: #f1f5f9;">👨‍👩‍👦 Responsáveis</h5>
-                <ul class="list-unstyled">
-                    {% for r in aluno.responsaveis %}
-                    <li style="color: #cbd5e1; background: #334155; padding: 8px 12px; border-radius: 8px; margin-bottom: 5px;">
-                        <strong style="color: #facc15;">{{ r.nome }}</strong> 
-                        <span style="color: #94a3b8;">({{ r.parentesco }})</span> 
-                        <span style="color: #60a5fa;">{{ r.telefone }}</span>
+                {% if responsaveis %}
+                <h5 class="fw-bold mt-4" style="color: var(--text);">Responsáveis</h5>
+                <ul class="list-unstyled mb-0">
+                    {% for r in responsaveis %}
+                    <li style="background: var(--surface-hover); padding: 10px 14px; border-radius: 6px; margin-bottom: 6px;">
+                        <strong style="color: var(--text);">{{ r.nome }}</strong>
+                        <span style="color: var(--text-2);">({{ r.parentesco }})</span>
+                        <span style="color: var(--primary);">{{ r.telefone }}</span>
                     </li>
                     {% endfor %}
                 </ul>
-                {% else %}
-                <p style="color: #94a3b8;">Nenhum responsável cadastrado.</p>
                 {% endif %}
 
-                <!-- CORRIGIDO: boletim → notas.boletim -->
-                <div class="mt-3">
-                    <a href="{{ url_for('notas.boletim', aluno_id=aluno.id) }}" class="btn btn-info">📊 Ver Boletim</a>
+                <div class="mt-4">
+                    <a href="{{ url_for('notas.boletim', aluno_id=aluno.id) }}" class="btn btn-primary">Ver Boletim</a>
                 </div>
             </div>
-
-            {% if livros_emprestados %}
-            <div class="card border-0 shadow p-4" style="background: #1e293b; color: #f1f5f9;">
-                <h5 class="fw-bold mb-4" style="color: #f1f5f9;">📚 Livros Emprestados</h5>
-                <table class="table" style="background: #1e293b; color: #f1f5f9;">
-                    <thead>
-                        <tr>
-                            <th style="color: #f1f5f9;">Título</th>
-                            <th style="color: #f1f5f9;">Data Empréstimo</th>
-                            <th style="color: #f1f5f9;">Data Devolução (limite)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for livro in livros_emprestados %}
-                        <tr>
-                            <td style="color: #f1f5f9;">{{ livro.titulo }}</td>
-                            <td style="color: #f1f5f9;">{{ livro.data_emprestimo or '-' }}</td>
-                            <td style="color: #f1f5f9;">{{ livro.data_devolucao or '-' }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="card border-0 shadow p-4" style="background: #1e293b; color: #f1f5f9;">
-                <h5 class="fw-bold" style="color: #f1f5f9;">📚 Livros Emprestados</h5>
-                <p style="color: #94a3b8;">Nenhum livro emprestado no momento.</p>
-            </div>
-            {% endif %}
-
         </div>
 
+        <!-- 🔥 CONQUISTAS DESBLOQUEADAS -->
+        {% if conquistas %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3" style="color: var(--text);">🏆 Conquistas Desbloqueadas</h5>
+                <div class="row g-3">
+                    {% for c in conquistas %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="text-center p-3" style="background: var(--surface-hover); border-radius: 10px; border: 1px solid var(--border);">
+                            <div style="font-size: 2.5rem; margin-bottom: 8px;">{{ c.icone }}</div>
+                            <div class="fw-bold" style="color: var(--text); font-size: 0.9rem;">{{ c.nome }}</div>
+                            <div style="color: var(--text-3); font-size: 0.75rem; margin-top: 4px;">{{ c.descricao }}</div>
+                            <div style="color: var(--primary); font-size: 0.7rem; margin-top: 8px; font-weight: 600;">
+                                {{ c.data.strftime('%d/%m/%Y') }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if livros_emprestados %}
+        <div class="card">
+            <div class="card-body p-0">
+                <h5 class="fw-bold p-4 pb-2" style="color: var(--text);">Livros Emprestados</h5>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Data Empréstimo</th>
+                                <th>Data Devolução (limite)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for livro in livros_emprestados %}
+                            <tr>
+                                <td class="fw-semibold">{{ livro.titulo }}</td>
+                                <td>{{ livro.data_emprestimo or '-' }}</td>
+                                <td>{{ livro.data_devolucao or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
-
-    {% else %}
-
-    <div class="card border-0 shadow p-5 text-center" style="background: #1e293b; color: #f1f5f9;">
-        <h4>Perfil não encontrado</h4>
-        <p style="color: #94a3b8;">Contate o administrador.</p>
-    </div>
-
-    {% endif %}
 
 </div>
+
+{% else %}
+
+<div class="card">
+    <div class="card-body text-center p-5">
+        <div style="font-size: 3rem;">⚠️</div>
+        <h4 class="mt-3" style="color: var(--text);">Perfil não encontrado</h4>
+        <p class="text-secondary mb-0">Contate o administrador.</p>
+    </div>
+</div>
+
+{% endif %}
 
 {% endblock %}

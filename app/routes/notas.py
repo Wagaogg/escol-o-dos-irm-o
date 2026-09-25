@@ -1,18 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from app import db
 from app.models.aluno import Aluno
-from app.models.professor import Professor
 from app.models.usuario import Usuario
 from app.models.notificacao import Notificacao
-from app.models.frequencia import Frequencia
 from datetime import datetime
 import json
 
 notas_bp = Blueprint('notas', __name__)
 
-# =========================
-# PERMISSÕES
-# =========================
 def is_admin():
     return session.get("tipo") in ["admin", "diretor"]
 
@@ -25,9 +20,6 @@ def is_professor():
 def is_aluno():
     return session.get("tipo") == "aluno"
 
-# =========================
-# LANÇAR NOTA
-# =========================
 @notas_bp.route("/notas/lancar", methods=["GET", "POST"])
 def lancar_nota():
     if 'usuario_id' not in session:
@@ -66,24 +58,18 @@ def lancar_nota():
         
         notas = json.loads(aluno.notas) if aluno.notas else []
         
-        # Verifica duplicata
         for n in notas:
             if n.get("disciplina", "").lower() == disciplina.lower() and n.get("bimestre") == bimestre:
                 flash(f"Já existe nota para {disciplina} no {bimestre}º bimestre.", "warning")
                 return redirect(url_for('notas.lancar_nota'))
         
-        notas.append({
-            "disciplina": disciplina,
-            "bimestre": bimestre,
-            "nota": nota
-        })
-        
+        notas.append({"disciplina": disciplina, "bimestre": bimestre, "nota": nota})
         aluno.notas = json.dumps(notas)
         db.session.commit()
         
-        flash(f"✅ Nota {nota} lançada para {aluno.usuario.nome} em {disciplina} ({bimestre}º bimestre).", "success")
+        flash(f"Nota {nota} lançada para {aluno.usuario.nome} em {disciplina} ({bimestre}º bimestre).", "success")
         
-        # Notificação
+        # 🔔 Notificação
         notif = Notificacao(
             usuario_id=aluno.usuario_id,
             mensagem=f"Nota lançada em {disciplina} ({bimestre}º bimestre): {nota}",
@@ -91,6 +77,10 @@ def lancar_nota():
         )
         db.session.add(notif)
         db.session.commit()
+        
+        # 🔥 VERIFICAR CONQUISTAS
+        from app.routes.conquistas import verificar_conquistas
+        verificar_conquistas(aluno.usuario_id)
         
         return redirect(url_for('notas.lancar_nota'))
     
@@ -110,9 +100,6 @@ def lancar_nota():
     
     return render_template("notas/lancar.html", alunos=alunos_com_nome, disciplinas=disciplinas, bimestres=bimestres)
 
-# =========================
-# BOLETIM (ALUNO) - COMPLETO COM NOTAS + FREQUÊNCIA
-# =========================
 @notas_bp.route("/boletim/<int:aluno_id>")
 def boletim(aluno_id):
     if 'usuario_id' not in session:
@@ -123,7 +110,6 @@ def boletim(aluno_id):
         flash("Aluno não encontrado.", "danger")
         return redirect(url_for('dashboard.index'))
     
-    # Permissões
     if is_aluno():
         usuario_id = session.get('usuario_id')
         aluno_logado = Aluno.query.filter_by(usuario_id=usuario_id).first()
@@ -134,11 +120,9 @@ def boletim(aluno_id):
         flash("Acesso negado.", "danger")
         return redirect(url_for('dashboard.index'))
     
-    # =========================
-    # NOTAS
-    # =========================
-    notas = json.loads(aluno.notas) if aluno.notas else []
+    from app.models.frequencia import Frequencia
     
+    notas = json.loads(aluno.notas) if aluno.notas else []
     disciplinas = sorted(set(n["disciplina"] for n in notas))
     dados_notas = {}
     for d in disciplinas:
@@ -149,9 +133,6 @@ def boletim(aluno_id):
                 if 1 <= bim <= 4:
                     dados_notas[d][bim] = n["nota"]
     
-    # =========================
-    # FREQUÊNCIA
-    # =========================
     frequencias = Frequencia.query.filter_by(aluno_id=aluno.id).all()
     freq_por_disciplina = {}
     for f in frequencias:
@@ -159,25 +140,15 @@ def boletim(aluno_id):
             freq_por_disciplina[f.disciplina] = {"presente": 0, "falta": 0, "justificada": 0}
         freq_por_disciplina[f.disciplina][f.status] += 1
     
-    # =========================
-    # MÉDIAS E SITUAÇÃO
-    # =========================
     resultado = {}
     for d in disciplinas:
-        # Média das notas (só se tiver as 4)
         notas_d = [dados_notas[d][b] for b in [1, 2, 3, 4] if dados_notas[d][b] is not None]
+        media = round(sum(notas_d) / 4, 2) if len(notas_d) == 4 else None
         
-        if len(notas_d) == 4:
-            media = round(sum(notas_d) / 4, 2)
-        else:
-            media = None
-        
-        # Frequência
         freq = freq_por_disciplina.get(d, {"presente": 0, "falta": 0, "justificada": 0})
         total_aulas = freq["presente"] + freq["falta"] + freq["justificada"]
         percentual_presenca = round((freq["presente"] / total_aulas) * 100, 1) if total_aulas > 0 else None
         
-        # Situação
         situacao = None
         if media is not None:
             if media >= 6 and (percentual_presenca is None or percentual_presenca >= 75):
@@ -196,16 +167,13 @@ def boletim(aluno_id):
             "situacao": situacao
         }
     
-    # Média geral (só disciplinas completas)
     medias_validas = [r["media"] for r in resultado.values() if r["media"] is not None]
     media_geral = round(sum(medias_validas) / len(medias_validas), 2) if medias_validas else None
     
-    # Frequência geral
     total_aulas_geral = sum(f["presente"] + f["falta"] + f["justificada"] for f in freq_por_disciplina.values())
     total_presentes_geral = sum(f["presente"] for f in freq_por_disciplina.values())
     percentual_geral = round((total_presentes_geral / total_aulas_geral) * 100, 1) if total_aulas_geral > 0 else None
     
-    # Situação geral
     situacao_geral = None
     if media_geral is not None:
         if media_geral >= 6 and (percentual_geral is None or percentual_geral >= 75):
@@ -213,7 +181,6 @@ def boletim(aluno_id):
         else:
             situacao_geral = "Reprovado"
     
-    # Dados do aluno
     aluno_info = {
         "id": aluno.id,
         "nome": aluno.usuario.nome if aluno.usuario else "Sem nome",

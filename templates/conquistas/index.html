@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}Conquistas - SEApp{% endblock %}
+
+{% block content %}
+
+<div class="page-title">Conquistas</div>
+<div class="page-subtitle">{{ desbloqueadas }} de {{ total }} desbloqueadas</div>
+
+<!-- Barra de progresso -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span style="color: var(--text-2); font-size: 0.9rem;">Progresso geral</span>
+            <span style="color: var(--primary); font-weight: 700; font-size: 1.2rem;">{{ percentual }}%</span>
+        </div>
+        <div style="background: var(--surface-hover); border-radius: 10px; height: 10px; overflow: hidden;">
+            <div style="width: {{ percentual }}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary-hover)); transition: width 0.5s;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Conquistas por categoria -->
+{% for categoria, lista in categorias.items() %}
+<div class="mb-4">
+    <h5 class="fw-bold mb-3" style="color: var(--text);">{{ categoria }}</h5>
+    <div class="row g-3">
+        {% for c in lista %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('conquistas.detalhe', codigo=c.codigo) }}" style="text-decoration: none;">
+                <div class="card h-100" style="
+                    {% if c.desbloqueada %}
+                        border-color: {{ c.raridade_info.cor }} !important;
+                        background: linear-gradient(135deg, var(--surface), var(--surface-hover));
+                        {% if c.raridade_info.brilho %}
+                            box-shadow: 0 0 20px {{ c.raridade_info.cor }}33;
+                        {% endif %}
+                    {% else %}
+                        opacity: 0.5;
+                    {% endif %}
+                    transition: all 0.2s;
+                ">
+                    <div class="card-body text-center position-relative">
+                        {% if c.desbloqueada %}
+                        <div style="position: absolute; top: 10px; right: 10px; color: var(--success); font-size: 1.2rem;">✓</div>
+                        {% endif %}
+
+                        <span class="badge" style="background: {{ c.raridade_info.cor }}22; color: {{ c.raridade_info.cor }}; font-size: 0.65rem; font-weight: 700; margin-bottom: 10px;">
+                            {{ c.raridade_info.label }}
+                        </span>
+
+                        <div style="font-size: 3.5rem; margin-bottom: 12px;">{{ c.icone }}</div>
+                        <h6 class="fw-bold mb-1" style="color: var(--text);">{{ c.nome }}</h6>
+                        <p class="mb-2" style="color: var(--text-3); font-size: 0.85rem;">{{ c.descricao }}</p>
+
+                        {# 🔥 Detalhamento (texto curto, com tooltip completo) #}
+                        {% if c.detalhamento %}
+                        <p class="mb-3" style="color: var(--text-3); font-size: 0.72rem; font-style: italic;"
+                           title="{{ c.detalhamento }}">
+                            {{ c.detalhamento[:80] }}{% if c.detalhamento|length > 80 %}…{% endif %}
+                        </p>
+                        {% endif %}
+
+                        {% if c.desbloqueada %}
+                        <span class="badge bg-success" style="font-size: 0.7rem;">
+                            Desbloqueada em {{ c.data.strftime('%d/%m/%Y') }}
+                        </span>
+                        <div style="color: var(--text-3); font-size: 0.7rem; margin-top: 6px;">
+                            {{ c.percentual_usuarios }}% dos usuários têm
+                        </div>
+                        {% else %}
+                        <div style="background: var(--surface-hover); border-radius: 10px; height: 6px; overflow: hidden; margin-bottom: 6px;">
+                            <div style="width: {{ c.progresso_percentual }}%; height: 100%; background: {{ c.raridade_info.cor }}; transition: width 0.3s;"></div>
+                        </div>
+                        <div style="color: var(--text-3); font-size: 0.7rem;">
+                            {{ c.progresso_atual }} / {{ c.progresso_meta }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+
+<!-- 🔥 TOAST DE CONQUISTA -->
+<div id="toastContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+<style>
+@keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
+}
+.conquista-toast {
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 320px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: slideIn 0.4s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.conquista-toast.saindo {
+    animation: slideOut 0.4s ease-in forwards;
+}
+.conquista-toast .toast-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+.conquista-toast .toast-content h6 {
+    margin: 0;
+    color: var(--text);
+    font-weight: 700;
+}
+.conquista-toast .toast-content p {
+    margin: 2px 0 0 0;
+    color: var(--text-3);
+    font-size: 0.8rem;
+}
+.conquista-toast .toast-content small {
+    color: var(--primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/conquistas/novas')
+        .then(res => res.json())
+        .then(data => {
+            if (data.novas && data.novas.length > 0) {
+                data.novas.forEach((c, i) => {
+                    setTimeout(() => {
+                        mostrarToast(c);
+                        fetch(`/api/conquistas/${c.id}/vista`, { method: 'POST' });
+                    }, i * 1500);
+                });
+            }
+        })
+        .catch(() => {});
+});
+
+function mostrarToast(c) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'conquista-toast';
+    toast.style.borderColor = c.raridade_info.cor;
+    if (c.raridade_info.brilho) {
+        toast.style.boxShadow = `0 0 20px ${c.raridade_info.cor}66`;
+    }
+    toast.innerHTML = `
+        <div class="toast-icon">${c.icone}</div>
+        <div class="toast-content">
+            <small style="color: ${c.raridade_info.cor};">Conquista Desbloqueada · ${c.raridade_info.label}</small>
+            <h6>${c.nome}</h6>
+            <p>${c.descricao}</p>
+        </div>
+    `;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('saindo');
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
+}
+</script>
+
+{% endblock %}

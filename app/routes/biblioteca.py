@@ -6,17 +6,21 @@ from app.models.usuario import Usuario
 from app.models.notificacao import Notificacao
 from datetime import datetime, timedelta
 import json
+import re
 
 biblioteca_bp = Blueprint('biblioteca', __name__)
 
 # =========================
-# PERMISSÕES (funções que serão chamadas DENTRO das rotas)
+# PERMISSÕES
 # =========================
 def is_admin():
     return session.get("tipo") in ["admin", "diretor"]
 
 def is_staff():
     return session.get("tipo") in ["admin", "diretor", "professor"]
+
+def is_professor():
+    return session.get("tipo") == "professor"
 
 def is_aluno():
     return session.get("tipo") == "aluno"
@@ -54,43 +58,26 @@ def listar():
         if aluno and aluno.usuario:
             nome_aluno_logado = aluno.usuario.nome
     
-    # Verifica se o aluno logado já tem um livro emprestado
     aluno_tem_livro = False
     if is_aluno():
         usuario_id = session.get('usuario_id')
         aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
-        if aluno and aluno.usuario:
-            nome_aluno = aluno.usuario.nome.strip().lower()
-            livro_emprestado = Livro.query.filter(
-                Livro.emprestado_para.isnot(None),
-                db.func.lower(Livro.emprestado_para) == nome_aluno
-            ).first()
+        if aluno:
+            livro_emprestado = Livro.query.filter_by(emprestado=True, emprestado_para=aluno.usuario.nome).first()
             if livro_emprestado:
                 aluno_tem_livro = True
     
     livros_lista = []
     for livro in resultado:
-        esta_emprestado = livro.emprestado_para is not None
-        
         pode_devolver = False
-        if esta_emprestado:
+        if livro.emprestado and livro.emprestado_para:
             if is_staff():
                 pode_devolver = True
             elif is_aluno():
                 usuario_id = session.get('usuario_id')
                 aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
-                if aluno and aluno.usuario:
-                    nome_aluno = aluno.usuario.nome.strip().lower()
-                    nome_emprestado = livro.emprestado_para.strip().lower()
-                    if nome_aluno == nome_emprestado:
-                        pode_devolver = True
-        
-        pode_emprestar = False
-        if livro.estoque > 0:
-            if is_staff():
-                pode_emprestar = True
-            elif is_aluno() and not aluno_tem_livro:
-                pode_emprestar = True
+                if aluno and aluno.usuario and aluno.usuario.nome == livro.emprestado_para:
+                    pode_devolver = True
         
         livros_lista.append({
             "id": livro.id,
@@ -102,10 +89,12 @@ def listar():
             "quantidade": livro.quantidade,
             "estoque": livro.estoque,
             "estoque_display": livro.estoque,
-            "emprestado": esta_emprestado,
+            "emprestado": livro.emprestado,
+            "emprestado_para": livro.emprestado_para,
+            "data_devolucao": livro.data_devolucao,
             "data_devolucao_br": formatar_data_br(livro.data_devolucao),
             "pode_devolver": pode_devolver,
-            "pode_emprestar": pode_emprestar
+            "pode_emprestar": (livro.estoque > 0 and (is_staff() or (is_aluno() and not aluno_tem_livro)))
         })
     
     return render_template(
@@ -172,6 +161,7 @@ def salvar_livro():
         quantidade=quantidade,
         estoque=quantidade,
         prazo_devolucao=prazo_devolucao,
+        emprestado=False,
         emprestado_para=None,
         data_emprestimo=None,
         data_devolucao=None
@@ -221,23 +211,18 @@ def emprestar_livro():
             flash("Aluno não encontrado no sistema.", "danger")
             return redirect(url_for('biblioteca.listar'))
         
-        nome_aluno_logado = aluno.usuario.nome.strip().lower()
-        # Verifica se o aluno já tem um livro emprestado
-        livro_emprestado = Livro.query.filter(
-            Livro.emprestado_para.isnot(None),
-            db.func.lower(Livro.emprestado_para) == nome_aluno_logado
-        ).first()
+        livro_emprestado = Livro.query.filter_by(emprestado=True, emprestado_para=aluno.usuario.nome).first()
         if livro_emprestado:
             flash(f"Você já possui um livro emprestado: {livro_emprestado.titulo}. Devolva antes de pegar outro.", "danger")
             return redirect(url_for('biblioteca.listar'))
         
-        # Verifica se o nome digitado é o próprio aluno
-        if nome_aluno.lower() != nome_aluno_logado:
+        if nome_aluno.lower() != aluno.usuario.nome.lower():
             flash("Aluno só pode emprestar livros para si mesmo.", "danger")
             return redirect(url_for('biblioteca.listar'))
     
     # Realiza empréstimo
     livro.estoque -= 1
+    livro.emprestado = True
     livro.emprestado_para = nome_aluno
     livro.data_emprestimo = datetime.now().date()
     prazo_dias = livro.prazo_devolucao or 7
@@ -248,7 +233,7 @@ def emprestar_livro():
     data_br = livro.data_devolucao.strftime("%d/%m/%Y")
     flash(f"Empréstimo realizado! {livro.titulo} - Devolver até: {data_br}.", "success")
     
-    # 🔔 NOTIFICAÇÃO para o aluno
+    # 🔔 Notificação
     if is_aluno():
         notif = Notificacao(
             usuario_id=session.get('usuario_id'),
@@ -257,6 +242,11 @@ def emprestar_livro():
         )
         db.session.add(notif)
         db.session.commit()
+    
+    # 🔥 VERIFICAR CONQUISTAS
+    if is_aluno():
+        from app.routes.conquistas import verificar_conquistas
+        verificar_conquistas(session.get('usuario_id'))
     
     return redirect(url_for('biblioteca.listar'))
 
@@ -283,14 +273,12 @@ def devolver_livro(livro_id):
     elif is_aluno():
         usuario_id = session.get('usuario_id')
         aluno = Aluno.query.filter_by(usuario_id=usuario_id).first()
-        if aluno and aluno.usuario:
-            nome_aluno = aluno.usuario.nome.strip().lower()
-            nome_emprestado = livro.emprestado_para.strip().lower()
-            if nome_aluno == nome_emprestado:
-                pode_devolver = True
+        if aluno and aluno.usuario and aluno.usuario.nome == livro.emprestado_para:
+            pode_devolver = True
     
     if pode_devolver:
         livro.estoque += 1
+        livro.emprestado = False
         livro.emprestado_para = None
         livro.data_emprestimo = None
         livro.data_devolucao = None
@@ -323,7 +311,7 @@ def excluir_livro(livro_id):
     return redirect(url_for('biblioteca.listar'))
 
 # =========================
-# API - TOP 5 LIVROS MAIS EMPRESTADOS
+# API - TOP 5 LIVROS
 # =========================
 @biblioteca_bp.route("/api/livros_emprestados")
 def api_livros_emprestados():
@@ -335,10 +323,7 @@ def api_livros_emprestados():
     for livro in livros:
         emprestados = livro.quantidade - livro.estoque
         if emprestados > 0:
-            dados.append({
-                "label": livro.titulo,
-                "value": emprestados
-            })
+            dados.append({"label": livro.titulo, "value": emprestados})
     
     dados = sorted(dados, key=lambda x: x["value"], reverse=True)[:5]
     if not dados:

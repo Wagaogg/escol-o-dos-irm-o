@@ -6,6 +6,10 @@ import json
 
 professores_bp = Blueprint('professores', __name__)
 
+
+# =========================
+# PERMISSÕES
+# =========================
 def is_admin():
     return session.get("tipo") in ["admin", "diretor"]
 
@@ -15,6 +19,10 @@ def is_staff():
 def is_professor():
     return session.get("tipo") == "professor"
 
+
+# =========================
+# LISTAR PROFESSORES
+# =========================
 @professores_bp.route("/professores")
 def listar():
     if 'usuario_id' not in session:
@@ -59,6 +67,10 @@ def listar():
         pode_editar=is_admin()
     )
 
+
+# =========================
+# CADASTRAR PROFESSOR
+# =========================
 @professores_bp.route("/professores/cadastrar")
 def cadastrar():
     if 'usuario_id' not in session:
@@ -67,6 +79,7 @@ def cadastrar():
         flash("Apenas administradores podem cadastrar professores.", "danger")
         return redirect(url_for('dashboard.index'))
     return render_template("professores/cadastrar.html")
+
 
 @professores_bp.route("/professores/salvar", methods=["POST"])
 def salvar():
@@ -80,7 +93,6 @@ def salvar():
     email = request.form.get("email")
     telefone = request.form.get("telefone")
     
-    # Verifica se já existe um professor com esse email
     prof_existente = Professor.query.filter(
         db.func.lower(Professor.email) == email.lower()
     ).first()
@@ -88,16 +100,13 @@ def salvar():
         flash("Já existe um professor cadastrado com este email.", "danger")
         return redirect(url_for('professores.cadastrar'))
     
-    # Verifica se já existe um usuário com esse email
     usuario = Usuario.query.filter_by(email=email).first()
     if usuario:
-        # Já existe usuário → vincula
         usuario.tipo = "professor"
         usuario.nome = nome
         db.session.commit()
         usuario_id = usuario.id
     else:
-        # Não existe usuário → deixa como NULL (será criado quando ele se cadastrar)
         usuario_id = None
     
     novo_professor = Professor(
@@ -115,6 +124,10 @@ def salvar():
     flash("Professor cadastrado com sucesso!", "success")
     return redirect(url_for('professores.listar'))
 
+
+# =========================
+# EDITAR PROFESSOR
+# =========================
 @professores_bp.route("/professores/<int:prof_id>/editar")
 def editar(prof_id):
     if 'usuario_id' not in session:
@@ -142,6 +155,7 @@ def editar(prof_id):
     
     return render_template("professores/editar.html", prof=professor_info)
 
+
 @professores_bp.route("/professores/<int:prof_id>/atualizar", methods=["POST"])
 def atualizar(prof_id):
     if 'usuario_id' not in session:
@@ -157,7 +171,7 @@ def atualizar(prof_id):
     
     professor.materia = request.form.get("materia")
     professor.telefone = request.form.get("telefone")
-    professor.email = request.form.get("email")  # atualiza email
+    professor.email = request.form.get("email")
     
     disciplinas = request.form.get("disciplinas", "")
     turmas_lista = request.form.get("turmas_lista", "")
@@ -172,9 +186,19 @@ def atualizar(prof_id):
         usuario.email = request.form.get("email")
     
     db.session.commit()
+    
+    # 🔥 VERIFICAR CONQUISTAS DO PROFESSOR
+    from app.routes.conquistas import verificar_conquistas
+    if professor.usuario_id:
+        verificar_conquistas(professor.usuario_id)
+    
     flash("Professor atualizado com sucesso!", "success")
     return redirect(url_for('professores.listar'))
 
+
+# =========================
+# EXCLUIR PROFESSOR
+# =========================
 @professores_bp.route("/professores/<int:prof_id>/excluir", methods=["POST"])
 def excluir(prof_id):
     if 'usuario_id' not in session:

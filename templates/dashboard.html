@@ -12,6 +12,7 @@
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #60A5FA;">👨‍🎓</div>
             <div class="stat-label">Alunos</div>
             <div class="stat-number" style="color: #60A5FA;">{{ total_alunos }}</div>
             <div class="stat-desc">cadastrados no sistema</div>
@@ -22,8 +23,9 @@
     {% if tipo in ['admin', 'diretor'] %}
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #34D399;">👨‍🏫</div>
             <div class="stat-label">Professores</div>
-            <div class="stat-number" style="color: #4ADE80;">{{ total_professores }}</div>
+            <div class="stat-number" style="color: #34D399;">{{ total_professores }}</div>
             <div class="stat-desc">cadastrados no sistema</div>
             <a href="{{ url_for('professores.listar') }}" class="btn btn-success">Ver Professores</a>
         </div>
@@ -32,6 +34,7 @@
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #FBBF24;">📚</div>
             <div class="stat-label">Biblioteca</div>
             <div class="stat-number" style="color: #FBBF24;">{{ disponiveis }}</div>
             <div class="stat-desc">livros disponíveis</div>
@@ -41,9 +44,9 @@
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #F87171;">📋</div>
             <div class="stat-label">Frequência</div>
-            <div class="stat-number" style="color: #F87171;">—</div>
-            <div class="stat-desc">controle de presença</div>
+            <div class="stat-desc" style="margin-top: 24px;">controle de presença</div>
             <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-danger">Fazer Chamada</a>
         </div>
     </div>
@@ -51,9 +54,9 @@
     {% if tipo == 'professor' %}
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #A78BFA;">📝</div>
             <div class="stat-label">Notas</div>
-            <div class="stat-number" style="color: #A78BFA;">—</div>
-            <div class="stat-desc">lançamento de notas</div>
+            <div class="stat-desc" style="margin-top: 24px;">lançamento de notas</div>
             <a href="{{ url_for('notas.lancar_nota') }}" class="btn btn-primary">Lançar Nota</a>
         </div>
     </div>
@@ -61,9 +64,9 @@
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #FBBF24;">🏆</div>
             <div class="stat-label">Ranking</div>
-            <div class="stat-number" style="color: #FBBF24;">🏆</div>
-            <div class="stat-desc">classificação dos alunos</div>
+            <div class="stat-desc" style="margin-top: 24px;">classificação dos alunos</div>
             <a href="{{ url_for('gamificacao.ranking') }}" class="btn btn-warning">Ver Ranking</a>
         </div>
     </div>
@@ -76,6 +79,7 @@
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #FBBF24;">📚</div>
             <div class="stat-label">Biblioteca</div>
             <div class="stat-number" style="color: #FBBF24;">{{ disponiveis }}</div>
             <div class="stat-desc">livros disponíveis</div>
@@ -85,18 +89,18 @@
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #60A5FA;">👤</div>
             <div class="stat-label">Meu Perfil</div>
-            <div class="stat-number" style="color: #60A5FA;">—</div>
-            <div class="stat-desc">informações pessoais</div>
+            <div class="stat-desc" style="margin-top: 24px;">informações pessoais</div>
             <a href="{{ url_for('meu_perfil.meu_perfil') }}" class="btn btn-primary">Ver Perfil</a>
         </div>
     </div>
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #34D399;">📊</div>
             <div class="stat-label">Boletim</div>
-            <div class="stat-number" style="color: #4ADE80;">—</div>
-            <div class="stat-desc">notas e frequência</div>
+            <div class="stat-desc" style="margin-top: 24px;">notas e frequência</div>
             {% if aluno_logado %}
             <a href="{{ url_for('notas.boletim', aluno_id=aluno_logado.id) }}" class="btn btn-success">Ver Boletim</a>
             {% else %}
@@ -107,24 +111,26 @@
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #F87171;">📋</div>
             <div class="stat-label">Frequência</div>
-            <div class="stat-number" style="color: #F87171;">—</div>
-            <div class="stat-desc">histórico de presença</div>
+            <div class="stat-desc" style="margin-top: 24px;">histórico de presença</div>
             <a href="{{ url_for('frequencia.minha_frequencia') }}" class="btn btn-danger">Ver Frequência</a>
         </div>
     </div>
 
     <div class="col-md-6 col-lg-4">
         <div class="dashboard-card">
+            <div class="stat-icon" style="color: #FBBF24;">🏆</div>
             <div class="stat-label">Ranking</div>
-            <div class="stat-number" style="color: #FBBF24;">🏆</div>
-            <div class="stat-desc">sua posição na turma</div>
+            <div class="stat-desc" style="margin-top: 24px;">sua posição na turma</div>
             <a href="{{ url_for('gamificacao.ranking') }}" class="btn btn-warning">Ver Ranking</a>
         </div>
     </div>
 
 </div>
 
+{% else %}
+<div class="alert alert-warning">Tipo de usuário não reconhecido.</div>
 {% endif %}
 
 {% endblock %}

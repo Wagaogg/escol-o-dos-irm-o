@@ -5,16 +5,12 @@ from app.models.aluno import Aluno
 from app.models.professor import Professor
 from app.models.usuario import Usuario
 from app.models.notificacao import Notificacao
-from datetime import datetime, date
+from datetime import datetime
 import json
 import re
-import unicodedata
 
 frequencia_bp = Blueprint('frequencia', __name__)
 
-# =========================
-# PERMISSÕES
-# =========================
 def is_admin():
     return session.get("tipo") in ["admin", "diretor"]
 
@@ -27,15 +23,11 @@ def is_professor():
 def is_aluno():
     return session.get("tipo") == "aluno"
 
-# =========================
-# NORMALIZAR TEXTO
-# =========================
 def normalizar(texto):
     if not texto:
         return ""
-    texto = unicodedata.normalize('NFKD', str(texto)).encode('ASCII', 'ignore').decode('ASCII')
-    texto = re.sub(r'[^a-zA-Z0-9\s]', '', texto)
-    texto = ' '.join(texto.lower().split())
+    texto = str(texto).lower()
+    texto = re.sub(r'[^a-z0-9]', '', texto)
     return texto
 
 # =========================
@@ -87,10 +79,7 @@ def marcar_lista():
         return redirect(url_for('frequencia.chamada'))
     
     turma_norm = normalizar(turma)
-    alunos = [
-        a for a in Aluno.query.all()
-        if a.turma and normalizar(a.turma) == turma_norm
-    ]
+    alunos = [a for a in Aluno.query.all() if a.turma and normalizar(a.turma) == turma_norm]
     
     registros_existentes = {}
     for f in Frequencia.query.filter_by(disciplina=disciplina, data=data_obj).all():
@@ -158,10 +147,7 @@ def salvar():
             professor_id = prof.id
     
     turma_norm = normalizar(turma)
-    alunos = [
-        a for a in Aluno.query.all()
-        if a.turma and normalizar(a.turma) == turma_norm
-    ]
+    alunos = [a for a in Aluno.query.all() if a.turma and normalizar(a.turma) == turma_norm]
     
     total_salvos = 0
     for aluno in alunos:
@@ -200,7 +186,13 @@ def salvar():
         total_salvos += 1
     
     db.session.commit()
-    flash(f"✅ Chamada salva! {total_salvos} aluno(s) registrado(s).", "success")
+    
+    # 🔥 VERIFICAR CONQUISTAS DE CADA ALUNO
+    from app.routes.conquistas import verificar_conquistas
+    for aluno in alunos:
+        verificar_conquistas(aluno.usuario_id)
+    
+    flash(f"Chamada salva! {total_salvos} aluno(s) registrado(s).", "success")
     return redirect(url_for('frequencia.relatorio'))
 
 # =========================

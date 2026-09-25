@@ -3,157 +3,149 @@
 
 {% block content %}
 
-<div class="container mt-4">
+<div class="page-title">Biblioteca</div>
+<div class="page-subtitle">Acervo de livros disponíveis.</div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h1 class="fw-bold" style="color: #f1f5f9;">📚 Biblioteca</h1>
-            <p style="color: #94a3b8;">Acervo de livros disponíveis.</p>
-        </div>
-        <div class="d-flex gap-2">
-            {% if tipo == "admin" or tipo == "diretor" %}
-            <a href="{{ url_for('biblioteca.cadastrar_livro') }}" class="btn btn-primary">+ Novo Livro</a>
-            {% endif %}
-            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#estatisticasModal">
-                📊 Ver Estatísticas
-            </button>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div></div>
+    <div class="d-flex gap-2">
+        {% if tipo == "admin" or tipo == "diretor" %}
+        <a href="{{ url_for('biblioteca.cadastrar_livro') }}" class="btn btn-primary">+ Novo Livro</a>
+        {% endif %}
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#estatisticasModal">
+            Ver Estatísticas
+        </button>
     </div>
-
-    <!-- FILTROS -->
-    <div class="card shadow border-0 mb-4" style="background: #1e293b;">
-        <div class="card-body">
-            <form method="GET" action="{{ url_for('biblioteca.listar') }}" class="row g-2 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label" style="color: #f1f5f9;">Buscar</label>
-                    <input type="text" name="busca" class="form-control" placeholder="Título ou autor..." value="{{ busca }}" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label" style="color: #f1f5f9;">Filtrar por status</label>
-                    <select name="filtro" class="form-control" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
-                        <option value="todos"      {% if filtro == "todos"      %}selected{% endif %}>Todos</option>
-                        <option value="disponivel" {% if filtro == "disponivel" %}selected{% endif %}>Disponíveis</option>
-                        <option value="emprestado" {% if filtro == "emprestado" %}selected{% endif %}>Emprestados</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">🔍 Buscar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- LISTA DE LIVROS -->
-    <div class="card shadow border-0" style="background: #1e293b;">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" style="background: #1e293b; color: #f1f5f9;">
-                    <thead style="background: #0f172a;">
-                        <tr>
-                            <th style="color: #94a3b8;">Título</th>
-                            <th style="color: #94a3b8;">Autor</th>
-                            <th style="color: #94a3b8;">Gênero</th>
-                            <th style="color: #94a3b8;">Ano</th>
-                            <th style="color: #94a3b8;">Status / Estoque</th>
-                            <th style="color: #94a3b8;">Data devolução</th>
-                            <th style="color: #94a3b8;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if livros %}
-                            {% for livro in livros %}
-                            <tr>
-                                <td class="fw-semibold" style="color: #f1f5f9;">{{ livro.titulo }}</td>
-                                <td style="color: #f1f5f9;">{{ livro.autor }}</td>
-                                <td style="color: #f1f5f9;">{{ livro.genero }}</td>
-                                <td style="color: #f1f5f9;">{{ livro.ano }}</td>
-                                <td>
-                                    {% if livro.emprestado %}
-                                        <span class="badge bg-danger">Emprestado</span>
-                                    {% else %}
-                                        <span class="badge bg-success">Disponível</span>
-                                    {% endif %}
-                                    <br>
-                                    <small style="color: #64748b;">📦 {{ livro.estoque_display or livro.estoque or 0 }} exemplar(es)</small>
-                                </td>
-                                <td>
-                                    {% if livro.emprestado %}
-                                        <span style="color: #000000; font-weight: 500;">{{ livro.data_devolucao_br or '-' }}</span>
-                                    {% else %}
-                                        <span style="color: #64748b;">-</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="d-flex gap-2 flex-wrap">
-
-                                        <!-- EMPRESTAR (agora só depende de pode_emprestar) -->
-                                        {% if livro.pode_emprestar %}
-                                        <button type="button" class="btn btn-sm btn-warning"
-                                                data-bs-toggle="modal" data-bs-target="#modalEmprestar"
-                                                data-livro-id="{{ livro.id }}" data-titulo="{{ livro.titulo }}">
-                                            📤 Emprestar
-                                        </button>
-                                        {% endif %}
-
-                                        <!-- DEVOLVER -->
-                                        {% if livro.emprestado and livro.pode_devolver %}
-                                        <form action="{{ url_for('biblioteca.devolver_livro', livro_id=livro.id) }}" method="POST">
-                                            <button type="submit" class="btn btn-sm btn-success">📥 Devolver</button>
-                                        </form>
-                                        {% endif %}
-
-                                        <!-- EXCLUIR (apenas admin/diretor) -->
-                                        {% if session.get('tipo') in ['admin','diretor'] %}
-                                        <form action="{{ url_for('biblioteca.excluir_livro', livro_id=livro.id) }}" method="POST"
-                                              onsubmit="return confirm('Excluir este livro?')">
-                                            <button type="submit" class="btn btn-sm btn-danger">🗑 Excluir</button>
-                                        </form>
-                                        {% endif %}
-
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="7" class="text-center" style="color: #94a3b8; padding: 40px;">
-                                    <h5>Nenhum livro encontrado</h5>
-                                    <p>{% if busca or filtro != "todos" %}Tente outros filtros.{% else %}Clique em "Novo Livro" para adicionar.{% endif %}</p>
-                                </td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- ALERTA PARA ALUNO (limite de 1 livro) -->
-    {% if session.get('tipo') == 'aluno' %}
-    <div class="mt-3 text-center">
-        <small style="color: #64748b;">
-            ⚠️ Você só pode ter <strong style="color: #f1f5f9;">1 livro</strong> emprestado por vez. Devolva o atual para pegar outro.
-        </small>
-    </div>
-    {% endif %}
-
 </div>
+
+<!-- FILTROS -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('biblioteca.listar') }}" class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="busca" class="form-control" placeholder="Título ou autor..." value="{{ busca }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Filtrar por status</label>
+                <select name="filtro" class="form-control">
+                    <option value="todos"      {% if filtro == "todos"      %}selected{% endif %}>Todos</option>
+                    <option value="disponivel" {% if filtro == "disponivel" %}selected{% endif %}>Disponíveis</option>
+                    <option value="emprestado" {% if filtro == "emprestado" %}selected{% endif %}>Emprestados</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- LISTA DE LIVROS -->
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Gênero</th>
+                        <th>Ano</th>
+                        <th>Status / Estoque</th>
+                        <th>Data devolução</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if livros %}
+                        {% for livro in livros %}
+                        <tr>
+                            <td class="fw-semibold">{{ livro.titulo }}</td>
+                            <td>{{ livro.autor }}</td>
+                            <td>{{ livro.genero }}</td>
+                            <td>{{ livro.ano }}</td>
+                            <td>
+                                {% if livro.emprestado %}
+                                    <span class="badge bg-danger">Emprestado</span>
+                                {% else %}
+                                    <span class="badge bg-success">Disponível</span>
+                                {% endif %}
+                                <br>
+                                <small>{{ livro.estoque_display or livro.estoque or 0 }} exemplar(es)</small>
+                            </td>
+                            <td>
+                                {% if livro.emprestado %}
+                                    <span style="font-weight: 500;">{{ livro.data_devolucao_br or '-' }}</span>
+                                {% else %}
+                                    <span style="color: var(--text-3);">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+
+                                    {% if livro.pode_emprestar %}
+                                    <button type="button" class="btn btn-warning btn-sm"
+                                            data-bs-toggle="modal" data-bs-target="#modalEmprestar"
+                                            data-livro-id="{{ livro.id }}" data-titulo="{{ livro.titulo }}">
+                                        Emprestar
+                                    </button>
+                                    {% endif %}
+
+                                    {% if livro.emprestado and livro.pode_devolver %}
+                                    <form action="{{ url_for('biblioteca.devolver_livro', livro_id=livro.id) }}" method="POST">
+                                        <button type="submit" class="btn btn-success btn-sm">Devolver</button>
+                                    </form>
+                                    {% endif %}
+
+                                    {% if session.get('tipo') in ['admin','diretor'] %}
+                                    <form action="{{ url_for('biblioteca.excluir_livro', livro_id=livro.id) }}" method="POST"
+                                          onsubmit="return confirm('Excluir este livro?')">
+                                        <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                    </form>
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center" style="padding: 40px;">
+                                <h5>Nenhum livro encontrado</h5>
+                                <p>{% if busca or filtro != "todos" %}Tente outros filtros.{% else %}Clique em "Novo Livro" para adicionar.{% endif %}</p>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ALERTA PARA ALUNO -->
+{% if session.get('tipo') == 'aluno' %}
+<div class="mt-3 text-center">
+    <small style="color: var(--text-3);">
+        Você só pode ter <strong style="color: var(--text);">1 livro</strong> emprestado por vez. Devolva o atual para pegar outro.
+    </small>
+</div>
+{% endif %}
 
 <!-- MODAL EMPRESTAR -->
 <div class="modal fade" id="modalEmprestar" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content" style="background:#1e293b; border:1px solid #334155;">
+        <div class="modal-content" style="background:var(--surface); border:1px solid var(--border);">
             <div class="modal-header border-0">
-                <h5 class="modal-title" style="color: #f1f5f9;">📤 Emprestar: <span id="livroTitulo"></span></h5>
+                <h5 class="modal-title" style="color: var(--text);">Emprestar: <span id="livroTitulo"></span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ url_for('biblioteca.emprestar_livro') }}" method="POST">
                 <input type="hidden" name="livro_id" id="livroIdInput" value="">
                 <div class="modal-body">
-                    <label class="form-label" style="color: #f1f5f9;">Nome do aluno</label>
+                    <label class="form-label">Nome do aluno</label>
                     <input type="text" name="nome_aluno" id="nomeAlunoInput" class="form-control"
-                           placeholder="Nome completo do aluno" required
-                           style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
+                           placeholder="Nome completo do aluno" required>
                     <small class="text-secondary" id="helperText">
                         {% if tipo == 'aluno' %}
                             Você só pode emprestar para você mesmo.
@@ -171,12 +163,12 @@
     </div>
 </div>
 
-<!-- MODAL ESTATÍSTICAS - TOP 5 LIVROS MAIS EMPRESTADOS -->
+<!-- MODAL ESTATÍSTICAS -->
 <div class="modal fade" id="estatisticasModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="background:#1e293b; border:1px solid #334155; color:#f1f5f9;">
+        <div class="modal-content" style="background:var(--surface); border:1px solid var(--border);">
             <div class="modal-header border-0">
-                <h5 class="modal-title">📊 Top 5 Livros Mais Emprestados</h5>
+                <h5 class="modal-title" style="color: var(--text);">Top 5 Livros Mais Emprestados</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -190,14 +182,12 @@
     </div>
 </div>
 
-<!-- Campos ocultos para o JS -->
 <input type="hidden" id="tipoUsuario" value="{{ session.get('tipo') }}">
 <input type="hidden" id="nomeAluno" value="{{ nome_aluno_logado or '' }}">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // MODAL DE EMPRÉSTIMO
     const modal = document.getElementById('modalEmprestar');
     if (modal) {
         modal.addEventListener('show.bs.modal', function(event) {
@@ -225,67 +215,52 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // GRÁFICO TOP 5 LIVROS EMPRESTADOS
     const modalEstatisticas = document.getElementById('estatisticasModal');
     let grafico = null;
 
-    modalEstatisticas.addEventListener('show.bs.modal', function() {
-        fetch('/api/livros_emprestados')
-            .then(response => response.json())
-            .then(data => {
-                const dados = data.dados;
-                const labels = dados.map(item => item.label);
-                const values = dados.map(item => item.value);
+    if (modalEstatisticas) {
+        modalEstatisticas.addEventListener('show.bs.modal', function() {
+            fetch('/api/livros_emprestados')
+                .then(response => response.json())
+                .then(data => {
+                    const dados = data.dados;
+                    const labels = dados.map(item => item.label);
+                    const values = dados.map(item => item.value);
 
-                const total = values.reduce((a, b) => a + b, 0);
-                document.getElementById('legendaGrafico').textContent = 
-                    total > 0 ? `Total de exemplares emprestados (top 5): ${total}` : 'Nenhum livro emprestado no momento.';
+                    const total = values.reduce((a, b) => a + b, 0);
+                    document.getElementById('legendaGrafico').textContent =
+                        total > 0 ? `Total de exemplares emprestados (top 5): ${total}` : 'Nenhum livro emprestado no momento.';
 
-                if (grafico) grafico.destroy();
+                    if (grafico) grafico.destroy();
 
-                const ctx = document.getElementById('graficoPizza').getContext('2d');
-                grafico = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: values,
-                            backgroundColor: [
-                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    color: '#f1f5f9',
-                                    font: { size: 12 }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.label || '';
-                                        let value = context.parsed || 0;
-                                        let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return `${label}: ${value} exemplar(es) (${percentage}%)`;
-                                    }
+                    const ctx = document.getElementById('graficoPizza').getContext('2d');
+                    grafico = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: values,
+                                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { color: '#B5BAC1', font: { size: 12 } }
                                 }
                             }
                         }
-                    }
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    document.getElementById('legendaGrafico').textContent = 'Erro ao carregar dados.';
                 });
-            })
-            .catch(error => {
-                console.error('Erro ao carregar dados:', error);
-                document.getElementById('legendaGrafico').textContent = 'Erro ao carregar dados.';
-            });
-    });
+        });
+    }
 });
 </script>
 

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}{{ info.nome }} - Conquista{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <a href="{{ url_for('conquistas.index') }}" class="btn btn-sm btn-secondary mb-3">← Voltar</a>
+</div>
+
+<div class="card mb-4" style="border-color: {{ raridade_info.cor }} !important; {% if raridade_info.brilho %}box-shadow: 0 0 30px {{ raridade_info.cor }}44;{% endif %}">
+    <div class="card-body text-center p-5">
+        <span class="badge mb-3" style="background: {{ raridade_info.cor }}22; color: {{ raridade_info.cor }}; font-size: 0.8rem; font-weight: 700; padding: 6px 14px;">
+            {{ raridade_info.label }}
+        </span>
+        <div style="font-size: 6rem; margin: 20px 0;">{{ info.icone }}</div>
+        <h2 class="fw-bold mb-2" style="color: var(--text);">{{ info.nome }}</h2>
+        <p style="color: var(--text-2); font-size: 1.1rem;">{{ info.descricao }}</p>
+
+        {% if info.detalhamento %}
+        <div class="mx-auto mt-3 p-3 text-start"
+             style="max-width: 640px; background: var(--bg-nav); border-radius: 10px; border-left: 3px solid {{ raridade_info.cor }};">
+            <div style="color: var(--text-3); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 6px;">
+                Como desbloquear
+            </div>
+            <div style="color: var(--text-2); font-size: 0.9rem; line-height: 1.6;">
+                {{ info.detalhamento }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if info.secreta %}
+        <span class="badge bg-danger mt-3">🔒 Conquista Secreta</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <div style="font-size: 2rem; color: {{ raridade_info.cor }}; font-weight: 800;">{{ usuarios_com|length }}</div>
+                <div style="color: var(--text-3); font-size: 0.85rem;">Usuários com essa conquista</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <div style="font-size: 2rem; color: var(--primary); font-weight: 800;">{{ percentual }}%</div>
+                <div style="color: var(--text-3); font-size: 0.85rem;">Dos usuários</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                {% if primeiro %}
+                <div style="font-weight: 700; color: var(--text);">{{ primeiro.nome }}</div>
+                <div style="color: var(--text-3); font-size: 0.85rem;">Primeiro a conquistar</div>
+                <div style="color: var(--text-3); font-size: 0.75rem;">{{ primeiro.data.strftime('%d/%m/%Y') }}</div>
+                {% else %}
+                <div style="color: var(--text-3);">Ninguém ainda</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de quem tem -->
+{% if usuarios_com %}
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="fw-bold mb-3" style="color: var(--text);">Quem conquistou</h5>
+        <div class="row g-2">
+            {% for u in usuarios_com %}
+            <div class="col-md-6 col-lg-4">
+                <div class="d-flex align-items-center gap-2 p-2" style="background: var(--surface-hover); border-radius: 8px;">
+                    {% if u.foto %}
+                    <img src="{{ url_for('static', filename=u.foto) }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--bg-nav); display: flex; align-items: center; justify-content: center;">👤</div>
+                    {% endif %}
+                    <div>
+                        <div style="color: var(--text); font-size: 0.85rem; font-weight: 500;">{{ u.nome }}</div>
+                        <div style="color: var(--text-3); font-size: 0.7rem;">{{ u.data.strftime('%d/%m/%Y') }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -5,3 +5,4 @@ from .livro import Livro
 from .notificacao import Notificacao
 from .frequencia import Frequencia
 from .configuracao import Configuracao
+from .conquista import Conquista, ConquistaVista

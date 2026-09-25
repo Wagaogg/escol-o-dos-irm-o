@@ -3,111 +3,85 @@
 
 {% block content %}
 
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="fw-bold" style="color: #f1f5f9;">📊 Relatório de Frequência</h1>
-            <p style="color: #94a3b8;">Presença dos alunos por turma e disciplina.</p>
-        </div>
-        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">← Voltar</a>
-    </div>
+<div class="page-title">Relatório de Frequência</div>
+<div class="page-subtitle">Presença dos alunos por turma e disciplina.</div>
 
-    <div class="card border-0 shadow mb-4" style="background: #1e293b;">
-        <div class="card-body">
-            <form method="GET" class="row g-2 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label" style="color: #f1f5f9;">Turma</label>
-                    <select name="turma" class="form-control" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
-                        <option value="">Todas</option>
-                        {% for t in turmas %}
-                        <option value="{{ t }}" {% if turma_filtro == t %}selected{% endif %}>{{ t }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label" style="color: #f1f5f9;">Disciplina</label>
-                    <select name="disciplina" class="form-control" style="background: #0f172a; color: #f1f5f9; border: 1px solid #334155;">
-                        <option value="">Todas</option>
-                        {% for d in disciplinas %}
-                        <option value="{{ d }}" {% if disciplina_filtro == d %}selected{% endif %}>{{ d }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">🔍 Filtrar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div class="d-flex justify-content-end mb-4">
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">← Voltar</a>
+</div>
 
-    <div class="card border-0 shadow" style="background: #1e293b;">
-        <div class="card-body">
-            {% if alunos_stats %}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th style="color: #94a3b8;">Aluno</th>
-                            <th style="color: #94a3b8;">Matrícula</th>
-                            <th style="color: #94a3b8;">Turma</th>
-                            <th style="color: #94a3b8; text-align: center;">✅</th>
-                            <th style="color: #94a3b8; text-align: center;">❌</th>
-                            <th style="color: #94a3b8; text-align: center;">📝</th>
-                            <th style="color: #94a3b8;">% Presença</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for stats in alunos_stats %}
-                        <tr>
-                            <td style="color: #f1f5f9; font-weight: 500;">{{ stats.nome }}</td>
-                            <td style="color: #94a3b8;">{{ stats.matricula or '-' }}</td>
-                            <td style="color: #f1f5f9;">{{ stats.turma or '-' }}</td>
-                            <td style="text-align: center; color: #34D399;">{{ stats.presente }}</td>
-                            <td style="text-align: center; color: #F87171;">{{ stats.falta }}</td>
-                            <td style="text-align: center; color: #FBBF24;">{{ stats.justificada }}</td>
-                            <td>
-                                <span class="badge {% if stats.percentual >= 75 %}bg-success{% elif stats.percentual >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}" style="font-size: 0.85rem;">
-                                    {{ stats.percentual }}%
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label">Turma</label>
+                <select name="turma" class="form-control">
+                    <option value="">Todas</option>
+                    {% for t in turmas %}
+                    <option value="{{ t }}" {% if turma_filtro == t %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            {% else %}
-            <div class="text-center p-5">
-                <div style="font-size: 3rem;">📭</div>
-                <h4 class="mt-3" style="color: #f1f5f9;">Nenhum registro encontrado</h4>
-                <p style="color: #94a3b8;">Faça uma chamada primeiro para ver os dados aqui.</p>
-                <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-primary mt-2">📋 Fazer Chamada</a>
+            <div class="col-md-5">
+                <label class="form-label">Disciplina</label>
+                <select name="disciplina" class="form-control">
+                    <option value="">Todas</option>
+                    {% for d in disciplinas %}
+                    <option value="{{ d }}" {% if disciplina_filtro == d %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            {% endif %}
-        </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<style>
-    .table {
-        --bs-table-bg: transparent;
-        --bs-table-color: #f1f5f9;
-        --bs-table-border-color: #334155;
-        --bs-table-hover-bg: rgba(96, 165, 250, 0.05);
-        --bs-table-hover-color: #f1f5f9;
-    }
-    .table thead th {
-        background: #0f172a !important;
-        color: #94a3b8 !important;
-        border-color: #334155 !important;
-    }
-    .table tbody td {
-        background: #1e293b !important;
-        color: #f1f5f9 !important;
-        border-color: #334155 !important;
-    }
-    .table tbody tr:hover td {
-        background: #273449 !important;
-    }
-</style>
+<div class="card">
+    <div class="card-body p-0">
+        {% if alunos_stats %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Aluno</th>
+                        <th>Matrícula</th>
+                        <th>Turma</th>
+                        <th style="text-align: center;">Presente</th>
+                        <th style="text-align: center;">Falta</th>
+                        <th style="text-align: center;">Justificada</th>
+                        <th>% Presença</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stats in alunos_stats %}
+                    <tr>
+                        <td class="fw-semibold">{{ stats.nome }}</td>
+                        <td>{{ stats.matricula or '-' }}</td>
+                        <td>{{ stats.turma or '-' }}</td>
+                        <td style="text-align: center; color: #34D399;">{{ stats.presente }}</td>
+                        <td style="text-align: center; color: #F87171;">{{ stats.falta }}</td>
+                        <td style="text-align: center; color: #FBBF24;">{{ stats.justificada }}</td>
+                        <td>
+                            <span class="badge {% if stats.percentual >= 75 %}bg-success{% elif stats.percentual >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}" style="font-size: 0.85rem;">
+                                {{ stats.percentual }}%
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center p-5">
+            <div style="font-size: 3rem;">📭</div>
+            <h4 class="mt-3" style="color: var(--text);">Nenhum registro encontrado</h4>
+            <p style="color: var(--text-2);">Faça uma chamada primeiro para ver os dados aqui.</p>
+            <a href="{{ url_for('frequencia.chamada') }}" class="btn btn-primary mt-2">Fazer Chamada</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
 {% endblock %}
